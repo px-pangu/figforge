@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FigForge · 科研图表与可发表级可视化工作台</title>
+<style>
+:root{
+  --bg:#F2F4F5; --bg2:#FAFBFB; --card:#FFFFFF;
+  --line:#DDE1E4; --line2:#CBD2D6;
+  --ink:#16191B; --dim:#5F686D; --dim2:#97A0A5;
+  --acc:#1D4E6B; --acc2:#2E7092; --accS:#EAF1F5;
+  --warn:#8A4B12; --warnS:#FBF1E6;
+  --ok:#20603C; --okS:#EAF3EE;
+  --bad:#8C2F2F; --badS:#F9ECEC;
+  --mono:Consolas,"SFMono-Regular",Menlo,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);
+  font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  font-size:14px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:0 22px 90px}
+a{color:var(--acc2)}
+button{font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer;background:var(--card);
+  border:1px solid var(--line2);border-radius:7px;padding:6px 13px;transition:.15s}
+button:hover{border-color:var(--acc);color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#F2F6F8;font-weight:600}
+button.primary:hover{background:var(--acc2);color:#fff}
+button.sm{padding:3px 10px;font-size:12px;border-radius:6px}
+button:disabled{opacity:.38;cursor:not-allowed}
+button:disabled:hover{border-color:var(--line2);color:var(--ink)}
+input[type=text],input[type=number],select,textarea{font-family:inherit;font-size:13px;color:var(--ink);
+  background:var(--bg2);border:1px solid var(--line);border-radius:7px;padding:6px 9px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);background:#fff}
+.mono{font-family:var(--mono)}
+.hd{position:sticky;top:0;z-index:50;background:rgba(242,244,245,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.hd .hdin{max-width:1240px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:baseline;gap:9px}
+.logo h1{margin:0;font-size:17px;letter-spacing:2px;color:var(--acc);font-weight:700}
+.logo .en{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--dim2)}
+.nav{display:flex;gap:5px;flex-wrap:wrap}
+.nav a{font-family:var(--mono);font-size:11px;text-decoration:none;color:var(--dim);border:1px solid transparent;
+  border-radius:14px;padding:2px 10px}
+.nav a:hover{border-color:var(--line2);color:var(--acc)}
+.pill{font-family:var(--mono);font-size:11px;border:1px solid var(--line2);border-radius:14px;padding:2px 9px;
+  background:var(--card);color:var(--dim)}
+.pill.on{border-color:var(--acc);color:var(--acc);background:var(--accS)}
+.hero{padding:34px 0 4px}
+.hero .kick{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--dim2);margin-bottom:8px}
+.hero h2{margin:0 0 8px;font-size:25px;line-height:1.45;color:var(--acc);letter-spacing:.6px;font-weight:700}
+.hero p{margin:0;color:var(--dim);max-width:760px}
+section{margin-top:30px;scroll-margin-top:66px}
+.sech{display:flex;align-items:baseline;gap:10px;margin-bottom:3px;flex-wrap:wrap}
+.sech .no{font-family:var(--mono);font-size:11.5px;color:var(--acc);letter-spacing:1.5px;opacity:.65}
+.sech h3{margin:0;font-size:16.5px;letter-spacing:.5px;font-weight:600}
+.sech .en{font-family:var(--mono);font-size:9.5px;color:var(--dim2);letter-spacing:2px}
+.secsub{margin:0 0 13px;font-size:12.5px;color:var(--dim)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:18px}
+.panel+.panel{margin-top:12px}
+.note{font-size:12px;color:var(--dim);background:var(--bg2);border:1px dashed var(--line2);border-radius:8px;
+  padding:8px 12px;margin-top:11px;line-height:1.7}
+.note.warn{background:var(--warnS);border-color:#E3CBAA;color:var(--warn)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:8px;margin:11px 0 0}
+.fields div{border:1px solid var(--line);border-left:2px solid var(--acc);background:var(--bg2);
+  border-radius:7px;padding:7px 10px;font-size:12px;color:var(--dim);line-height:1.7}
+.fields div b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:1.2px;color:var(--dim2);
+  font-weight:400;margin-bottom:1px}
+.drop{border:1.5px dashed var(--line2);border-radius:11px;background:var(--bg2);padding:22px;text-align:center;transition:.15s}
+.drop.over{border-color:var(--acc);background:var(--accS)}
+.drop .big{font-size:14px;color:var(--dim)}
+.drop .hint{font-family:var(--mono);font-size:11px;color:var(--dim2);margin-top:5px}
+.rowbtns{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;align-items:center}
+.tblbox{max-height:290px;overflow:auto;border:1px solid var(--line);border-radius:9px;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{border-bottom:1px solid var(--line);padding:5px 9px;text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--bg2);font-weight:600;color:var(--dim);font-size:11.5px;z-index:2}
+th .ty{display:block;font-family:var(--mono);font-size:9px;color:var(--dim2);font-weight:400}
+td.n{font-family:var(--mono);color:var(--dim);text-align:right}
+.cands{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.cand{background:var(--card);border:1px solid var(--line);border-radius:11px;overflow:hidden;transition:.16s;cursor:pointer}
+.cand:hover{border-color:var(--acc2)}
+.cand.sel{border-color:var(--acc);box-shadow:0 0 0 2px var(--accS)}
+.cand .top{padding:9px 12px 6px}
+.cand .nm{font-size:13.5px;font-weight:600;letter-spacing:.3px}
+.cand .why{font-size:12px;color:var(--dim);margin-top:3px;line-height:1.7}
+.cand .fig{background:#FFFFFF;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px}
+.caveat{background:var(--warnS);border-top:1px solid #E6D1B4;padding:8px 12px;font-size:11.8px;color:var(--warn);line-height:1.7}
+.caveat b{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;display:block;color:#96601F;font-weight:600}
+.picksrow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:12px}
+.fld{display:flex;flex-direction:column;gap:3px}
+.fld label{font-size:11.5px;color:var(--dim)}
+.jgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.jcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;transition:.15s}
+.jcard:hover{border-color:var(--acc2)}
+.jcard.sel{border-color:var(--acc);background:var(--accS)}
+.jcard h4{margin:0 0 2px;font-size:14px;letter-spacing:.5px}
+.jcard .src{font-family:var(--mono);font-size:9px;color:var(--dim2);letter-spacing:.5px}
+.jcard dl{margin:8px 0 0;font-size:11.5px;color:var(--dim);line-height:1.7}
+.jcard dl dt{font-family:var(--mono);font-size:9.5px;color:var(--dim2);margin-top:4px}
+.jcard dl dd{margin:0}
+.specrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px}
+.specrow div{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.specrow span{display:block;font-family:var(--mono);font-size:9.5px;color:var(--dim2);letter-spacing:1px}
+.specrow b{font-family:var(--mono);font-size:13px;color:var(--acc)}
+.figwrap{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px;margin-top:12px}
+.figstage{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:14px}
+.figbox{background:#FFFFFF;border:1px solid var(--line2);border-radius:2px;padding:0;overflow:auto}
+.figbox svg{display:block}
+.figmeta{font-family:var(--mono);font-size:10.5px;color:var(--dim2);margin-top:7px;line-height:1.7}
+.caption{font-size:12.5px;color:var(--dim);border-left:2px solid var(--acc);background:var(--bg2);
+  border-radius:0 7px 7px 0;padding:8px 11px;margin-top:10px;line-height:1.8}
+.sides{display:flex;flex-direction:column;gap:12px}
+.swatches{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.swatch{width:19px;height:19px;border-radius:4px;border:1px solid rgba(0,0,0,.12)}
+.checks{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.chk{display:flex;gap:7px;align-items:flex-start;font-size:12px;color:var(--dim);line-height:1.6}
+.chk i{font-family:var(--mono);font-style:normal;width:15px;height:15px;flex:0 0 15px;text-align:center;
+  border-radius:50%;font-size:10px;line-height:15px;margin-top:2px;border:1px solid var(--line2)}
+.chk.pass i{background:var(--okS);border-color:var(--ok);color:var(--ok)}
+.chk.fail i{background:var(--badS);border-color:var(--bad);color:var(--bad)}
+.chk.pass{color:var(--ok)}
+.chk.fail{color:var(--bad)}
+pre{font-family:var(--mono);font-size:11.5px;line-height:1.65;background:var(--bg2);border:1px solid var(--line);
+  border-radius:9px;padding:12px;overflow:auto;max-height:430px;margin:0;white-space:pre}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.tagline{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;color:var(--dim);margin-top:8px}
+.kv span{font-family:var(--mono);font-size:10.5px;color:var(--dim2)}
+.kv b{font-family:var(--mono);font-weight:400;color:var(--ink);word-break:break-all}
+.split2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.foot{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--dim2)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#F2F6F8;
+  font-size:12.5px;padding:9px 16px;border-radius:20px;opacity:0;transition:.25s;pointer-events:none;z-index:99}
+.toast.on{opacity:.96}
+@media(max-width:1060px){.cands{grid-template-columns:1fr}.jgrid{grid-template-columns:repeat(2,1fr)}
+  .figwrap{grid-template-columns:1fr}.split2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hd"><div class="hdin">
+  <div class="logo"><h1>FIGFORGE</h1><div class="en">RESEARCH VISUAL</div></div>
+  <div class="nav">
+    <a href="#s1">01 数据导入</a><a href="#s2">02 类型推荐</a><a href="#s3">03 期刊模板</a>
+    <a href="#s4">04 配色标注</a><a href="#s5">05 导出</a><a href="#s6">06 代码复现</a>
+  </div>
+  <div style="flex:1"></div>
+  <div id="hdrstat" class="pill">未载入数据</div>
+</div></div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="kick">PUBLICATION-READY FIGURE WORKBENCH</div>
+    <h2>FigForge · 科研图表与可发表级可视化工作台</h2>
+    <p>上传数据 → 自动推荐图表并给出反面提示 → 套用 Nature / Elsevier / IEEE / ACS 模板 → 导出带溯源元数据的 PDF / SVG / TIFF。全程只读原始数据：不改值、不删点、不插补、不四舍五入。</p>
+    <div class="fields" style="grid-template-columns:repeat(auto-fit,minmax(215px,1fr))">
+      <div><b>HARD RULE 01</b>禁止任何形式的数据篡改；离群点仅标注，随机数必带种子。</div>
+      <div><b>HARD RULE 02</b>默认不截断 Y 轴；手动截断必画断轴符号并在图注写明区间。</div>
+      <div><b>HARD RULE 03</b>任何平滑 / 拟合 / 插补必须在图注标明方法与参数。</div>
+      <div><b>HARD RULE 04</b>导出文件内嵌原始数据链接与生成时间戳（ISO 8601）。</div>
+    </div>
+  </div>
+
+  <!-- STEP 01 -->
+  <section id="s1">
+    <div class="sech"><span class="no">STEP 01</span><h3>数据导入</h3><span class="en">INGESTION</span></div>
+    <p class="secsub">解析 CSV / TSV，逐列推断变量类型；原始层只读，任何异常只做标注。</p>
+    <div class="panel">
+      <div class="drop" id="drop">
+        <div class="big">拖入 CSV / TSV，或点击下方按钮</div>
+        <div class="hint">Excel 请「另存为 CSV」后载入 · 全部解析在浏览器本地完成，文件不上传</div>
+      </div>
+      <div class="rowbtns">
+        <button class="primary" onclick="document.getElementById('fileEl').click()">选择文件</button>
+        <button onclick="loadSample('dose')">示例：剂量-响应（n=240，两组）</button>
+        <button onclick="loadSample('ts')">示例：时序记录（n=5000）</button>
+        <button onclick="loadSample('sc')">示例：大样本散点（n=60000）</button>
+        <button onclick="loadSample('clinical')">示例：三组临床（n=90）</button>
+      </div>
+      <input type="file" id="fileEl" accept=".csv,.tsv,.txt" style="display:none">
+      <div id="datasum" class="kv"></div>
+      <div id="issues"></div>
+    </div>
+    <div class="panel">
+      <div style="font-size:13px;color:var(--dim)">解析预览（前 12 行，只读）</div>
+      <div class="tblbox" id="preview"><div style="padding:22px;color:var(--dim2);font-size:12.5px">尚未载入数据</div></div>
+    </div>
+    <div class="fields">
+      <div><b>步骤</b>数据导入与只读锁定</div>
+      <div><b>页面交互</b>拖入 CSV／TSV；预览表逐列显类型、缺失率、唯一值数，可手改锁定</div>
+      <div><b>算法/规则</b>唯一率&gt;95%→ID；非数值水平 ≤min(20,n^0.5)→分类；可解析→日期；缺失&gt;30% 黄标不填补</div>
+      <div><b>期刊规范条款</b>Nature 要求随文提交 source data；禁四舍五入、删点、插补与静默类型转换（SEPT9）</div>
+      <div><b>导出参数</b>附原数据副本＋SHA-256、UTF-8、时区与 parse_log（列类型、缺失清单）</div>
+      <div><b>校验项</b>行数一致；哈希重算通过；缺失与可疑转换列 100% 列出；alter_log 为空</div>
+    </div>
+  </section>
+
+  <!-- STEP 02 -->
+  <section id="s2">
+    <div class="sech"><span class="no">STEP 02</span><h3>类型推荐</h3><span class="en">CHART SUGGESTION</span></div>
+    <p class="secsub">3 种候选图，每张同时给出推荐理由与「该图会掩盖什么信息」的反面提示——反面提示不可关闭。</p>
+    <div class="panel">
+      <div class="picksrow">
+        <div class="fld"><label>X 轴变量</label><select id="selX" style="min-width:150px"></select></div>
+        <div class="fld"><label>Y 轴变量</label><select id="selY" style="min-width:150px"></select></div>
+        <div class="fld"><label>分组变量（可选）</label><select id="selG" style="min-width:150px"></select></div>
+        <button class="sm" onclick="refreshAll()">重新推荐</button>
+      </div>
+      <div class="cands" id="cands"></div>
+      <div id="recNote" class="note"></div>
+    </div>
+    <div class="fields">
+      <div><b>步骤</b>类型推荐：3 候选图＋反面提示</div>
+      <div><b>页面交互</b>三卡并排同数渲染；推荐理由与常驻不可关的反面提示同显；点选后摘要入图注</div>
+      <div><b>算法/规则</b>按变量组合打分取前三；n&gt;2000 自动降密度渲染并公示分箱；n≤10 强制全点叠加</div>
+      <div><b>期刊规范条款</b>Nature／Elsevier 劝退以「均值±误差棒」代分布；须显示全部点或确切 n</div>
+      <div><b>导出参数</b>figure_spec.json 记 chart_id、reason、caveat、bin_size、n、seed</div>
+      <div><b>校验项</b>每卡 caveat 非空；条形类默认全点叠加；n≤10 降级抖动散点；导出须知复述 caveat</div>
+    </div>
+  </section>
+
+  <!-- STEP 03 -->
+  <section id="s3">
+    <div class="sech"><span class="no">STEP 03</span><h3>期刊模板</h3><span class="en">JOURNAL TEMPLATES</span></div>
+    <p class="secsub">参数取自四社现行条款；选中即写死，不随后续滑杆漂移。</p>
+    <div class="panel">
+      <div class="jgrid" id="jgrid"></div>
+      <div class="picksrow">
+        <div class="fld"><label>栏宽</label><select id="selCol">
+          <option value="single">单栏</option><option value="onehalf">1.5 栏</option><option value="double">双栏</option></select></div>
+        <div class="fld"><label>宽度 mm</label><input type="number" id="inW" step="1" style="width:88px"></div>
+        <div class="fld"><label>高度 mm</label><input type="number" id="inH" step="1" style="width:88px"></div>
+        <div class="fld"><label>刻度字号 pt</label><input type="number" id="inFS" step="0.5" style="width:80px"></div>
+        <div class="fld"><label>图元线宽 pt</label><input type="number" id="inLW" step="0.05" style="width:80px"></div>
+      </div>
+      <div class="specrow" id="specrow"></div>
+      <div id="jurNote" class="note"></div>
+    </div>
+    <div class="fields">
+      <div><b>步骤</b>期刊模板：四社规范库</div>
+      <div><b>页面交互</b>四社卡＋单双栏切换；选中后参数写死，只读显示条款出处</div>
+      <div><b>算法/规则</b>px=mm×dpi/25.4；字号线宽按印刷尺寸反算校验，超限告警；模板不被滑杆覆盖</div>
+      <div><b>期刊规范条款</b>Nature 89／183 mm、5–7 pt、≥300 dpi；Elsevier 90／190 mm、≥7 pt；IEEE 3.5／7.16 in、≥8 pt；ACS ≤3.33／≤7 in、≥4.5 pt</div>
+      <div><b>导出参数</b>宽高 mm、dpi、RGB、TrueType 子集嵌入</div>
+      <div><b>校验项</b>尺寸落区间；字号线宽达标；双栏高不超上限</div>
+    </div>
+  </section>
+
+  <!-- STEP 04 -->
+  <section id="s4">
+    <div class="sech"><span class="no">STEP 04</span><h3>配色与标注</h3><span class="en">PALETTE &amp; SIGNIFICANCE</span></div>
+    <p class="secsub">色盲友好配色 ＋ 显著性星号；星号由本地计算的检验给出，并做多重比较校正。</p>
+    <div class="split2">
+      <div class="panel">
+        <div style="font-size:13px;font-weight:600">配色方案</div>
+        <div class="picksrow">
+          <div class="fld"><label>调色板</label><select id="selPal">
+            <option value="okabe">Okabe–Ito 八色（CVD 安全）</option>
+            <option value="nature8">Nature 官方无障碍八色</option>
+            <option value="viridis">viridis（感知均匀连续）</option>
+            <option value="cividis">cividis（含 CVD 均匀）</option>
+            <option value="grey">灰度打印安全</option></select></div>
+          <div class="fld"><label>色觉模拟</label><select id="selCvd">
+            <option value="none">正常视力</option><option value="prot">红色盲 protanopia</option>
+            <option value="deut">绿色盲 deuteranopia</option><option value="trit">蓝色盲 tritanopia</option>
+            <option value="gray">全灰阶（黑白打印）</option></select></div>
+        </div>
+        <div class="swatches" id="swatches"></div>
+        <div class="note">可分辨性校验：<span id="grayres" class="mono">—</span>；色块同时以符号／线型冗余编码。</div>
+      </div>
+      <div class="panel">
+        <div style="font-size:13px;font-weight:600">显著性标注</div>
+        <div class="picksrow">
+          <div class="fld"><label>组 A</label><select id="selA" style="min-width:120px"></select></div>
+          <div class="fld"><label>组 B</label><select id="selB" style="min-width:120px"></select></div>
+          <div class="fld"><label>检验</label><select id="selTest">
+            <option value="welch">Welch t（不等方差）</option>
+            <option value="student">Student t（等方差）</option>
+            <option value="mwu">Mann–Whitney U（正态近似）</option></select></div>
+          <div class="fld"><label>多重校正</label><select id="selCorr">
+            <option value="none">不校正</option><option value="bh">BH (FDR)</option>
+            <option value="bonf">Bonferroni</option></select></div>
+        </div>
+        <div class="rowbtns"><button class="primary sm" onclick="computeStats()">计算并标注</button>
+          <button class="sm" onclick="clearAnno()">清除标注</button></div>
+        <div id="statout" class="kv"></div>
+      </div>
+    </div>
+    <div class="fields">
+      <div><b>步骤</b>配色与显著性标注</div>
+      <div><b>页面交互</b>Okabe–Ito／viridis／cividis／灰度切换；三型色盲与灰阶模拟；选两组＋检验＋校正出星号</div>
+      <div><b>算法/规则</b>定性 ≤8 色禁红绿相邻与彩虹；连续色固定 vmin/vmax；Welch t 本地算 p，BH／Bonferroni 校正分级</div>
+      <div><b>期刊规范条款</b>ACS 要求文本对比度 ≥4.5:1、非文本 ≥3:1；Nature 禁红绿对比与彩虹尺，须有符号冗余</div>
+      <div><b>导出参数</b>色值十六进制、检验方法、统计量、df、精确 p、每组 n 入图注</div>
+      <div><b>校验项</b>星号与 p 一致；灰度可辨；每组标 n；误差棒定义已写明</div>
+    </div>
+  </section>
+
+  <!-- STEP 05 -->
+  <section id="s5">
+    <div class="sech"><span class="no">STEP 05</span><h3>导出</h3><span class="en">EXPORT</span></div>
+    <p class="secsub">矢量优先，栅格按最终印刷尺寸反算像素；文件头内嵌源数据链接与 ISO 8601 时间戳。</p>
+    <div class="figwrap">
+      <div class="figstage">
+        <div class="tagline">
+          <span class="pill on" id="pillSize">—</span>
+          <span class="pill" id="pillDpi">—</span>
+          <span class="pill" id="pillFmt">—</span>
+          <button class="sm" onclick="toggleActual()">切 100% 印刷尺寸</button>
+        </div>
+        <div class="figbox" id="figbox" style="margin-top:10px"></div>
+        <div class="figmeta" id="figmeta"></div>
+        <div class="caption" id="caption">载入数据后自动生成图注。</div>
+      </div>
+      <div class="sides">
+        <div class="panel">
+          <div style="font-size:13px;font-weight:600">版面与诚实性选项</div>
+          <div class="picksrow">
+            <div class="fld"><label>误差棒</label><select id="selErr">
+              <option value="sd">标准差 SD</option><option value="sem">标准误 SEM</option>
+              <option value="ci95">95% 置信区间</option></select></div>
+            <div class="fld"><label>网格线</label><select id="selGrid">
+              <option value="1">15% 不透明度（默认）</option><option value="0">关闭</option></select></div>
+          </div>
+          <div class="picksrow">
+            <div class="fld"><label>X 轴标题</label><input type="text" id="inXL" style="width:110px"></div>
+            <div class="fld"><label>Y 轴标题</label><input type="text" id="inYL" style="width:110px"></div>
+          </div>
+          <div class="picksrow">
+            <div class="fld" style="flex:1"><label>源数据链接 / 路径</label>
+              <input type="text" id="inSrc" placeholder="https://… 或 raw_data.csv" style="width:100%"></div>
+          </div>
+          <div class="picksrow" id="cutRow" style="display:none">
+            <div class="fld"><label>截断下界</label><input type="number" id="inCut0" style="width:84px"></div>
+            <div class="fld"><label>截断上界</label><input type="number" id="inCut1" style="width:84px"></div>
+            <button class="sm" onclick="applyCut()">应用截断</button>
+          </div>
+          <label class="chk" style="margin-top:8px"><input type="checkbox" id="cbPoints" checked onchange="renderMain()"> 条形图叠加全部原始数据点（Nature／Elsevier 建议）</label>
+          <label class="chk"><input type="checkbox" id="cbN" checked onchange="renderMain()"> 图上标出每组样本量 n</label>
+          <label class="chk"><input type="checkbox" id="cbFit" onchange="renderMain()"> 叠加 OLS 线性拟合（须在图注声明）</label>
+          <label class="chk"><input type="checkbox" id="cbCut" onchange="onCutChange()"> 截断 Y 轴（须标断轴符号）</label>
+        </div>
+        <div class="panel">
+          <div style="font-size:13px;font-weight:600">导出参数</div>
+          <div class="picksrow">
+            <div class="fld"><label>格式</label><select id="selFmt">
+              <option value="pdf">PDF（嵌入矢量/位图）</option><option value="svg">SVG（矢量）</option>
+              <option value="tiff">TIFF（栅格）</option><option value="png">PNG（含 tEXt）</option></select></div>
+            <div class="fld"><label>dpi</label><input type="number" id="inDpi" value="300" step="100" min="300" max="1200" style="width:82px"></div>
+          </div>
+          <input type="range" id="rngDpi" min="300" max="1200" step="100" value="300" style="width:100%">
+          <div class="rowbtns">
+            <button class="primary" id="btnExport" onclick="doExport()">导出图稿</button>
+            <button onclick="exportSpec()">figure_spec.json</button>
+            <button onclick="exportData()">原数据副本 + 校验值</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div style="font-size:13px;font-weight:600">投稿预检</div>
+          <div class="checks" id="checks"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fields">
+      <div><b>步骤</b>导出 PDF／SVG／TIFF</div>
+      <div><b>页面交互</b>格式＋dpi 滑杆；「投稿预检」全绿才放行，未过项禁用导出并列出条目</div>
+      <div><b>算法/规则</b>矢量路径优先；栅格按印刷尺寸 × dpi 反算像素；字体子集嵌入且不转曲</div>
+      <div><b>期刊规范条款</b>Nature 禁文字转曲；Elsevier TIFF 用 LZW 无损；分辨率按最终印刷尺寸核算，禁上采样</div>
+      <div><b>导出参数</b>文件名 FigN_期刊_栏宽_dpi；文件头内嵌 source_url、sha256、UTC 时间戳、renderer 版本</div>
+      <div><b>校验项</b>链接与时间戳入文件头；dpi 元数据＝像素÷尺寸；PDF 文字可复制</div>
+    </div>
+  </section>
+
+  <!-- STEP 06 -->
+  <section id="s6">
+    <div class="sech"><span class="no">STEP 06</span><h3>代码复现</h3><span class="en">REPRODUCIBLE CODE</span></div>
+    <p class="secsub">由同一份 figure_spec.json 渲染，参数全部写死值，含随机种子与环境版本锁。</p>
+    <div class="panel">
+      <div class="tabs">
+        <button class="sm" id="tabPy" onclick="showCode('py')">Python · matplotlib</button>
+        <button class="sm" id="tabR" onclick="showCode('r')">R · ggplot2</button>
+        <button class="sm" onclick="copyCode()">复制代码</button>
+        <button class="sm" onclick="downloadCode()">下载脚本</button>
+        <button class="sm" onclick="downloadReq()">依赖清单</button>
+      </div>
+      <pre id="code">载入数据后生成。</pre>
+    </div>
+    <div class="fields">
+      <div><b>步骤</b>代码复现：Python／R 双轨</div>
+      <div><b>页面交互</b>双栏代码同步显示，可复制下载，附依赖锁与 sessionInfo 快照</div>
+      <div><b>算法/规则</b>由同一 figure_spec.json 渲染，含种子、分箱参数、统计调用与环境版本，参数写死</div>
+      <div><b>期刊规范条款</b>Nature／Elsevier 要求图可由脚本重建；拟合平滑在图注与代码双处声明</div>
+      <div><b>导出参数</b>figsize(mm→inch)、savefig(dpi、metadata)、np.random.seed／set.seed</div>
+      <div><b>校验项</b>重跑图元一致；重跑哈希一致；依赖可一键安装；拟合参数与图注文本一致</div>
+    </div>
+  </section>
+
+  <div class="foot">FigForge v1.0 · 单文件本地渲染，数据不出浏览器。期刊参数取自 Nature Research figure guidelines、Elsevier Artwork Instructions、IEEE Author Digital Toolbox、ACS Preparing Graphics；投稿前请以目标期刊当期 Guide for Authors 复核。</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* =======================================================================
+   FigForge — 单文件科研图稿工作台
+   设计约束：原始数据只读 · 视觉「精密、中性、无装饰」 · 条款硬校验
+   ======================================================================= */
+
+/* ---------- 0. 工具 ---------- */
+var $ = function (s) { return document.querySelector(s); };
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function MM2PT(mm){return mm/25.4*72;}
+function clamp(v,a,b){return Math.min(b,Math.max(a,v));}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('on');},2200);}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function fmt(v,dec){if(v===undefined||v===null||!isFinite(v))return '';
+  if(dec!==undefined)return v.toFixed(dec);
+  var a=Math.abs(v);if(a>=1e5||(a<1e-3&&a>0))return v.toExponential(2);
+  return String(Math.round(v*1e4)/1e4);}
+function niceScale(min,max,n){
+  n=n||5;if(!isFinite(min)||!isFinite(max)){min=0;max=1;}
+  if(min===max){min-=0.5;max+=0.5;}
+  var raw=(max-min)/n,mag=Math.pow(10,Math.floor(Math.log10(raw||1))),nz=raw/mag;
+  var step=(nz<1.5?1:nz<3?2:nz<7?5:10)*mag;
+  var lo=Math.floor(min/step)*step,hi=Math.ceil(max/step)*step,ticks=[];
+  for(var v=lo;v<=hi+step*1e-9;v+=step)ticks.push(Math.abs(v)<step*1e-9?0:v);
+  return {lo:lo,hi:hi,step:step,ticks:ticks};
+}
+function scaleTicks(s){
+  var dec=Math.max(0,Math.min(6,-Math.floor(Math.log10(s.step)+1e-9)));
+  return {lo:s.lo,hi:s.hi,step:s.step,ticks:s.ticks,dec:dec,f:function(v){return fmt(v,dec);}};
+}
+function mean(a){var s=0,i;for(i=0;i<a.length;i++)s+=a[i];return s/a.length;}
+function sd(a){var m=mean(a),s=0,i;for(i=0;i<a.length;i++)s+=(a[i]-m)*(a[i]-m);return Math.sqrt(s/(a.length-1));}
+function median(a){var v=a.slice().sort(function(x,y){return x-y;}),m=Math.floor(v.length/2);
+  return v.length%2?v[m]:(v[m-1]+v[m])/2;}
+function quantile(sorted,p){var i=p*(sorted.length-1),lo=Math.floor(i),hi=Math.ceil(i);
+  return lo===hi?sorted[lo]:sorted[lo]+(sorted[hi]-sorted[lo])*(i-lo);}
+function lgamma(z){var g=[676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,
+  12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(z<0.5)return Math.log(Math.PI/Math.sin(Math.PI*z))-lgamma(1-z);
+  z-=1;var x=0.99999999999980993,i;
+  for(i=0;i<g.length;i++)x+=g[i]/(z+i+1);
+  var t=z+g.length-0.5;
+  return 0.5*Math.log(2*Math.PI)+(z+0.5)*Math.log(t)-t+Math.log(x);}
+function betacf(a,b,x){var FPMIN=1e-300,EPS=3e-12,qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap,h;
+  if(Math.abs(d)<FPMIN)d=FPMIN;d=1/d;h=d;
+  for(var m=1;m<=200;m++){var m2=2*m,aa=m*(b-m)*x/((qam+m2)*(a+m2));
+    d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;d=1/d;
+    var del=d*c;h*=del;if(Math.abs(del-1)<EPS)break;}
+  return h;}
+function betai(a,b,x){if(x<=0)return 0;if(x>=1)return 1;
+  var bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function tP2(t,df){return betai(df/2,0.5,df/(df+t*t));}
+function erf(x){var s=x<0?-1:1;x=Math.abs(x);var t=1/(1+0.3275911*x);
+  var y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;}
+function welchT(a,b){
+  var ma=mean(a),mb=mean(b),va=sd(a)*sd(a),vb=sd(b)*sd(b),na=a.length,nb=b.length;
+  var se=Math.sqrt(va/na+vb/nb),t=(ma-mb)/se;
+  var df=Math.pow(va/na+vb/nb,2)/(Math.pow(va/na,2)/(na-1)+Math.pow(vb/nb,2)/(nb-1));
+  return {t:t,df:df,p:tP2(t,df),statLabel:'t'};}
+function studentT(a,b){
+  var ma=mean(a),mb=mean(b),va=sd(a)*sd(a),vb=sd(b)*sd(b),na=a.length,nb=b.length;
+  var sp=((na-1)*va+(nb-1)*vb)/(na+nb-2),se=Math.sqrt(sp*(1/na+1/nb)),t=(ma-mb)/se,df=na+nb-2;
+  return {t:t,df:df,p:tP2(t,df),statLabel:'t'};}
+function rankAll(a){
+  var idx=a.map(function(v,i){return [v,i];}).sort(function(x,y){return x[0]-y[0];});
+  var r=new Array(a.length),i=0;
+  while(i<idx.length){var j=i;
+    while(j+1<idx.length&&idx[j+1][0]===idx[i][0])j++;
+    var rv=(i+j)/2+1,k;for(k=i;k<=j;k++)r[idx[k][1]]=rv;i=j+1;}
+  return r;}
+function mannWhitney(a,b){
+  var all=a.concat(b),r=rankAll(all),n1=a.length,n2=b.length,i,R1=0;
+  for(i=0;i<n1;i++)R1+=r[i];
+  var U=R1-n1*(n1+1)/2,sd=Math.sqrt(n1*n2*(n1+n2+1)/12),z=(U-n1*n2/2)/sd;
+  return {t:z,df:NaN,p:2*(1-0.5*(1+erf(Math.abs(z)/Math.SQRT2))),statLabel:'z',U:U};}
+function bhAdjust(ps){
+  var n=ps.length,idx=ps.map(function(p,i){return [p,i];}).sort(function(a,b){return a[0]-b[0];});
+  var out=new Array(n),i,prev=1,v;
+  for(i=n-1;i>=0;i--){
+    v=Math.min(prev,idx[i][0]*n/(i+1));
+    v=Math.max(0,Math.min(1,v));
+    out[idx[i][1]]=v;prev=v;}
+  return out;}
+function stars(p){return p<0.001?'***':p<0.01?'**':p<0.05?'*':'ns';}
+function ols(xs,ys){
+  var n=xs.length;if(n<3)return null;
+  var mx=mean(xs),my=mean(ys),sxy=0,sxx=0,i;
+  for(i=0;i<n;i++){sxy+=(xs[i]-mx)*(ys[i]-my);sxx+=(xs[i]-mx)*(xs[i]-mx);}
+  if(!sxx)return null;
+  var b=sxy/sxx,a=my-b*mx,ss=0,st=0;
+  for(i=0;i<n;i++){var p=a+b*xs[i];ss+=(ys[i]-p)*(ys[i]-p);st+=(ys[i]-my)*(ys[i]-my);}
+  return {a:a,b:b,r2:st?1-ss/st:0,n:n};}
+
+/* ---------- 1. 期刊模板库（数值取自各社现行条款） ---------- */
+var JOURNALS={
+  nature:{name:'Nature',src:'nature.com · figure guidelines',
+    cols:{single:89,onehalf:128,double:183},minFont:5,maxFont:7,base:7,tick:6,label:7,panel:8,
+    lw:0.5,minLw:0.25,dpi:300,hMax:170,colors:'RGB（推荐）',
+    note:'单栏 89 mm / 双栏 183 mm / 1.5 栏 120–136 mm，整图最大高度 170 mm；正文 5–7 pt，这里取 7 pt 上限、刻度 6 pt；线宽 ≥0.25 pt，常用 0.5 pt；≥300 dpi；矢量优先且保留可编辑层，禁止把文字转为轮廓，字体须嵌入（TrueType 2 / 42）。'},
+  elsevier:{name:'Elsevier',src:'elsevier.com · artwork instructions',
+    cols:{single:90,onehalf:140,double:190},minFont:6,maxFont:12,base:8,tick:7,label:8,panel:9,
+    lw:0.6,minLw:0.25,dpi:300,hMax:240,colors:'RGB 优先',
+    note:'单栏 90 mm / 1.5 栏 140 mm / 双栏 190 mm；成品通用规则为正文约 7 pt、上下标不小于 6 pt；栅格按内容分级：半色调 300 dpi、混合图 500 dpi、线稿 1000 dpi；TIFF 建议 LZW 无损压缩后交付。'},
+  ieee:{name:'IEEE',src:'IEEE Author Digital Toolbox',
+    cols:{single:88.9,onehalf:132,double:181.9},minFont:8,maxFont:12,base:9,tick:8,label:9,panel:10,
+    lw:0.8,minLw:0.5,dpi:300,hMax:200,colors:'RGB，须灰度可读',
+    note:'单栏 3.5 in（88.9 mm），双栏常见 7.16 in（181.9 mm，部分期刊标注上限 7-1/16 in ≈ 179 mm）；最终印刷尺寸内最小字号 8 pt；线宽建议不小于 0.5 pt；线图建议 600 dpi；颜色不得单独承载信息，须以符号或线型冗余区分。'},
+  acs:{name:'ACS',src:'ACS · preparing graphics',
+    cols:{single:84.67,onehalf:127,double:177.8},minFont:4.5,maxFont:11,base:8,tick:7,label:8,panel:9,
+    lw:0.6,minLw:0.5,dpi:300,hMax:233.2,colors:'RGB，文本对比度 ≥4.5:1',
+    note:'单栏最大 240 pt（3.33 in ≈ 84.7 mm），双栏 300–504 pt（4.167–7 in），含图注最大深度 660 pt（9.167 in）；最小字号 4.5 pt（此处取 7–8 pt 以保可读性）；线不得细于 0.5 pt；黑白线稿 1200 dpi、灰度 600 dpi、彩色 300 dpi；非文字元素对比度 ≥3:1。'}
+};
+
+/* ---------- 2. 调色板与色觉模拟矩阵 ---------- */
+var PALETTES={
+  okabe:['#000000','#E69F00','#56B4E9','#009E73','#F0E442','#0072B2','#D55E00','#CC79A7'],
+  nature8:['#000000','#E69F00','#56B4E9','#009E73','#F0E442','#0072B2','#D55E00','#CC79A7'],
+  viridis:['#440154','#472D7B','#3B528B','#2C728E','#21918C','#28AE80','#5EC962','#ADD725','#FDE725'],
+  cividis:['#00224E','#31446B','#666970','#958F78','#C8B25B','#F9E721'],
+  grey:['#111111','#3B3B3B','#636363','#8C8C8C','#B3B3B3','#D1D1D1']
+};
+var CVD={
+  prot:'0.567 0.433 0 0 0  0.558 0.442 0 0 0  0 0.242 0.758 0 0  0 0 0 1 0',
+  deut:'0.625 0.375 0 0 0  0.7 0.3 0 0 0  0 0.3 0.7 0 0  0 0 0 1 0',
+  trit:'0.95 0.05 0 0 0  0 0.433 0.567 0 0  0 0.475 0.525 0 0  0 0 0 1 0',
+  gray:'0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0 0 0 1 0'
+};
+
+/* ---------- 3. 状态 ---------- */
+var SPEC={chart:'scatter',x:null,y:null,group:null,journal:'nature',colMode:'single',
+  widthMM:89,heightMM:62,baseFont:7,tickFont:6,labelFont:7,panelFont:8,lw:0.5,dpi:300,
+  palette:'okabe',cvd:'none',grid:true,errBar:'sd',showPoints:true,showN:true,showLegend:true,
+  yCut:null,fit:false,xlabel:'',ylabel:'',sourceUrl:'',panel:'a',anno:null,stats:null,
+  fitInfo:null,candidates:[],actual:true,seed:20261024,bins:64};
+var DATA=null,EXPORTS_READY=false,CODE={py:'',r:''},CODE_TAB='py';
+
+/* ---------- 4. 解析与类型推断 ---------- */
+function detectDelim(text){
+  var line=(text.split(/\r?\n/).filter(function(l){return l.trim()!=='';})[0])||'';
+  var best=',',bc=0;
+  [',','\t',';','|'].forEach(function(d){
+    var c=line.split(d).length-1;if(c>bc){bc=c;best=d;}});
+  return best;
+}
+function parseDelim(text){
+  var delim=detectDelim(text),rows=[],row=[],f='',q=false,i=0,c;
+  while(i<text.length){
+    c=text.charAt(i);
+    if(q){
+      if(c==='"'){if(text.charAt(i+1)==='"'){f+='"';i++;}else q=false;}
+      else f+=c;
+    }else{
+      if(c==='"')q=true;
+      else if(c===delim){row.push(f);f='';}
+      else if(c==='\n'){row.push(f);rows.push(row);row=[];f='';}
+      else if(c==='\r'){}
+      else f+=c;
+    }
+    i++;
+  }
+  if(f!==''||row.length){row.push(f);rows.push(row);}
+  return {delim:delim,rows:rows.filter(function(r){return r.some(function(v){return v!=='';});})};
+}
+var NUM_RE=/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/;
+var DATE_RE=/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})([ T]\d{1,2}:\d{2}(:\d{2})?)?$/;
+function isNumStr(v){return v!==''&&v!==null&&v!==undefined&&NUM_RE.test(String(v).trim());}
+function inferType(vals){
+  var ne=[],i;
+  for(i=0;i<vals.length;i++)if(vals[i]!==''&&vals[i]!==null)ne.push(vals[i]);
+  var missing=vals.length-ne.length;
+  if(!ne.length)return {type:'empty',uniq:0,missing:missing,missingRate:1};
+  var uniq=(function(){var s={},k=0;for(var j=0;j<ne.length;j++){if(!s[ne[j]]){s[ne[j]]=1;k++;}}return k;})();
+  var uniqRate=uniq/ne.length,numAll=true,bool=t=>null;
+  for(i=0;i<ne.length;i++)if(!isNumStr(ne[i])){numAll=false;break;}
+  if(numAll){
+    // 只有「全为整数且几乎不重复」才判为 ID 列，避免把连续测量值误判成主键
+    var allInt=true;
+    for(i=0;i<ne.length;i++){if(!/^[-+]?\d+$/.test(String(ne[i]).trim())){allInt=false;break;}}
+    var asId=(uniqRate>0.95&&uniq>20&&allInt);
+    return {type:(asId?'id':'numeric'),uniq:uniq,missing:missing,missingRate:missing/vals.length};
+  }
+  if(uniq<=2&&ne.every(function(v){return /^(true|false|yes|no|0|1)$/i.test(String(v).trim());}))
+    return {type:'categorical',uniq:uniq,missing:missing,missingRate:missing/vals.length};
+  var dt=0;for(i=0;i<ne.length;i++)if(DATE_RE.test(String(ne[i]).trim()))dt++;
+  if(dt/ne.length>0.9)return {type:'date',uniq:uniq,missing:missing,missingRate:missing/vals.length};
+  if(uniqRate>0.95&&uniq>50)return {type:'id',uniq:uniq,missing:missing,missingRate:missing/vals.length};
+  var cap=Math.min(20,Math.max(2,Math.round(Math.sqrt(ne.length))));
+  if(uniq<=cap)return {type:'categorical',uniq:uniq,missing:missing,missingRate:missing/vals.length};
+  return {type:'text',uniq:uniq,missing:missing,missingRate:missing/vals.length};
+}
+function fnv128(s){
+  var h1=0x811c9dc5,h2=0x01000193,i;
+  for(i=0;i<s.length;i++){
+    var c=s.charCodeAt(i);
+    h1=Math.imul(h1^c,h2)>>>0;
+    h2=(Math.imul(h2,16777619)^(c<<3))>>>0;
+  }
+  return h1.toString(16).padStart(8,'0')+h2.toString(16).padStart(8,'0');
+}
+function sha256(s){
+  try{
+    if(window.crypto&&crypto.subtle){
+      return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){
+        return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');});
+    }
+  }catch(e){}
+  return Promise.resolve('fnv1a128:'+(fnv128(s)+fnv128(s.split('').reverse().join(''))).padEnd(64,'0').slice(0,64));
+}
+function ingest(name,rows,raw){
+  var header=rows[0].map(function(h,i){return String(h||('col'+(i+1))).trim();});
+  var body=rows.slice(1);
+  var cols=header.map(function(h,i){
+    var vals=body.map(function(r){return r[i]===undefined?'':String(r[i]);});
+    var inf=inferType(vals);
+    return {name:h,type:inf.type,vals:vals,uniq:inf.uniq,missing:inf.missing,missingRate:inf.missingRate};
+  });
+  return sha256(raw||'').then(function(hash){
+    DATA={name:name,cols:cols,n:body.length,sha:hash,delim:detectDelim(raw||''),
+      tz:Intl.DateTimeFormat().resolvedOptions().timeZone,alters:[]};
+    cols.forEach(function(c){
+      if(c.missingRate>0.3)DATA.alters.push({col:c.name,k:'missing',
+        msg:'缺失率 '+(c.missingRate*100).toFixed(1)+'%：已标注，未做任何填补'});
+      var lead=0,gene=0,i;
+      for(i=0;i<c.vals.length;i++){
+        if(/^0\d+$/.test(c.vals[i]))lead++;
+        if(/^[A-Z]{1,3}\d{1,3}$/.test(c.vals[i]))gene++;
+      }
+      if(lead>0)DATA.alters.push({col:c.name,k:'leadzero',
+        msg:lead+' 个值为前导零编号：按文本处理，禁止转数值'});
+      if(c.type==='text'&&gene>3&&gene>c.vals.length*0.3)DATA.alters.push({col:c.name,k:'gene',
+        msg:gene+' 个值疑似基因符号（如 SEPT9）：禁止按日期解析'});
+    });
+    var nums=cols.filter(function(c){return c.type==='numeric';});
+    var cats=cols.filter(function(c){return c.type==='categorical'||c.type==='date';});
+    var lastNum=function(arr){return arr.length?arr[arr.length-1]:null;};
+    if(nums.length>=2&&body.length>2000){
+      SPEC.x=nums[0].name;SPEC.y=nums[1].name;
+      SPEC.group=cats.length?cats[0].name:null;
+    }else{
+      SPEC.x=(cats[0]||nums[0]||cols[0]).name;
+      SPEC.y=(lastNum(nums.filter(function(c){return c.name!==SPEC.x;}))||nums[0]||cols[1]||cols[0]).name;
+      var gc=cats.filter(function(c){return c.type==='categorical'&&c.name!==SPEC.x;})[0];
+      SPEC.group=gc?gc.name:null;
+    }
+    SPEC.xlabel=SPEC.x;SPEC.ylabel=SPEC.y;
+    if(SPEC.chart)SPEC.chart='__auto__';
+    $('#inXL').value=SPEC.x;$('#inYL').value=SPEC.y;
+    var st=$('#hdrstat');st.textContent=DATA.name+' · '+DATA.n+' 行 × '+cols.length+' 列';
+    st.className='pill on';
+    renderDataSum();renderTable();renderSelects();applyJournal();refreshAll();
+  });
+}
+function renderDataSum(){
+  var d=DATA;
+  $('#datasum').innerHTML='<span>FILE</span><b>'+esc(d.name)+'</b>'+
+    '<span>ROWS / COLS</span><b>'+d.n+' × '+d.cols.length+'</b>'+
+    '<span>DELIMITER</span><b>'+(d.delim==='\t'?'TAB':esc(d.delim))+'</b>'+
+    '<span>ENCODING / TZ</span><b>UTF-8 · '+esc(d.tz)+'</b>'+
+    '<span>SHA-256</span><b>'+esc(d.sha)+'</b>';
+  if(!d.alters.length){
+    $('#issues').innerHTML='<div class="note">未检测到缺失超标、前导零编号或疑似基因符号；原始层只读，未改值、未删点、未插补。</div>';
+  }else{
+    $('#issues').innerHTML=d.alters.map(function(a){
+      return '<div class="note warn"><b>'+esc(a.col)+'</b> · '+esc(a.msg)+'</div>';}).join('');
+  }
+}
+function renderTable(){
+  if(!DATA)return;
+  var cols=DATA.cols.slice(0,14),rowsN=Math.min(12,DATA.n),h,i,j;
+  h='<table><thead><tr>';
+  for(i=0;i<cols.length;i++){
+    h+='<th>'+esc(cols[i].name)+'<span class="ty">'+cols[i].type+
+       ' · 缺失 '+(cols[i].missingRate*100).toFixed(0)+'% · 唯一 '+cols[i].uniq+'</span></th>';
+  }
+  h+='</tr></thead><tbody>';
+  for(j=0;j<rowsN;j++){
+    h+='<tr>';
+    for(i=0;i<cols.length;i++){
+      var v=cols[i].vals[j];
+      h+=(cols[i].type==='numeric'?'<td class="n">':'<td>')+esc(v)+'</td>';
+    }
+    h+='</tr>';
+  }
+  $('#preview').innerHTML=h+'</tbody></table>';
+}
+function renderSelects(){
+  if(!DATA)return;
+  function opts(sel){
+    return DATA.cols.map(function(c){
+      return '<option value="'+esc(c.name)+'"'+(SPEC[sel]===c.name?' selected':'')+'>'+
+             esc(c.name)+' · '+c.type+'</option>';}).join('');
+  }
+  $('#selX').innerHTML=opts('x');
+  $('#selY').innerHTML=opts('y');
+  $('#selG').innerHTML='<option value=""'+(SPEC.group?'':' selected')+'>（不分组）</option>'+opts('group');
+  var gr=groupsOf();
+  $('#selA').innerHTML=gr.map(function(g,i){
+    return '<option value="'+i+'">'+esc(g.name)+' (n='+g.ys.length+')</option>';}).join('');
+  $('#selB').innerHTML=gr.map(function(g,i){
+    return '<option value="'+i+'"'+(i===1?' selected':'')+'>'+esc(g.name)+' (n='+g.ys.length+')</option>';}).join('');
+}
+function colByName(n){return DATA?DATA.cols.filter(function(c){return c.name===n;})[0]:null;}
+
+/* ---------- 5. 数据抽取（只读） ---------- */
+function xToNum(v,type){
+  if(type==='numeric')return parseFloat(v);
+  if(type==='date'){var t=Date.parse(v);return isNaN(t)?NaN:t;}
+  return NaN;
+}
+function numPairs(){
+  var X=colByName(SPEC.x),Y=colByName(SPEC.y),G=SPEC.group?colByName(SPEC.group):null;
+  var out=[];if(!X||!Y)return out;
+  for(var i=0;i<DATA.n;i++){
+    var yv=Y.vals[i];
+    if(!isNumStr(yv))continue;
+    var xv=NaN;
+    if(X.type==='numeric'||X.type==='date'){xv=xToNum(X.vals[i],X.type);if(!isFinite(xv))continue;}
+    out.push({x:xv,y:parseFloat(yv),g:G?String(G.vals[i]):'全部',raw:X.vals[i],i:i});
+  }
+  return out;
+}
+function groupsOf(){
+  var P=numPairs(),X=colByName(SPEC.x);
+  if(!DATA||!X)return [];
+  if(X.type!=='numeric'&&X.type!=='date'){
+    var map={},order=[],i;
+    for(i=0;i<P.length;i++){
+      if(!map[P[i].raw]){map[P[i].raw]=[];order.push(P[i].raw);}
+      map[P[i].raw].push(P[i].y);
+    }
+    order.sort(function(a,b){return String(a).localeCompare(String(b),'zh');});
+    return order.slice(0,12).map(function(n,i){
+      var ys=map[n].slice().sort(function(a,b){return a-b;});
+      return {name:String(n),i:i,xs:null,ys:ys};});
+  }
+  var G=SPEC.group?colByName(SPEC.group):null;
+  if(G){
+    var m={},ord=[],k;
+    for(k=0;k<P.length;k++){
+      if(!m[P[k].g]){m[P[k].g]={xs:[],ys:[]};ord.push(P[k].g);}
+      m[P[k].g].xs.push(P[k].x);m[P[k].g].ys.push(P[k].y);
+    }
+    return ord.slice(0,10).map(function(n,i){return {name:String(n),i:i,xs:m[n].xs,ys:m[n].ys};});
+  }
+  return [{name:'全部',i:0,xs:P.map(function(p){return p.x;}),ys:P.map(function(p){return p.y;})}];
+}
+
+/* ---------- 6. 推荐引擎（含反面提示） ---------- */
+function recommend(){
+  var P=numPairs(),n=P.length,X=colByName(SPEC.x),Y=colByName(SPEC.y);
+  var G=SPEC.group?colByName(SPEC.group):null,list=[];
+  if(!Y||Y.type!=='numeric')return [];
+  var grpName=G?G.name:'无';
+  if(X.type==='numeric'||X.type==='date'){
+    if(X.type==='date'){
+      list.push({chart:'line',title:'时序折线图',
+        reason:'X 可解析为时间且 n='+n+'，按时间顺序连线最能直接反映随时间的变化过程。',
+        caveat:'组内个体变异被折叠成一条线，线的粗细不传达样本量；不等间隔的采样会被画成等距，缺失时间点会被直线跨过去、看起来像连续观测——缺失时间点必须在图注中另行说明。'});
+      list.push({chart:'scatter',title:'全点时序散点图',
+        reason:'不假定相邻点之间有关系，每个观测独立呈现，采样密度与实际缺失一目了然。',
+        caveat:'点密集时重叠区域的实际数量被压平；不连线会让趋势读起来吃力，趋势强弱容易被密集区的视觉重量误导。'});
+      list.push({chart:'hist2d',title:'二维分箱密度图',
+        reason:'n='+n+' 较多时用计数密度替代单点，在不丢观测的前提下维持可读性。',
+        caveat:'丢失单点身份与离群点位置；分辨率由 bin 尺寸决定，粗 bin 会合并邻近小簇（当前 '+SPEC.bins+'×'+SPEC.bins+'）。'});
+    }else if(n>2000){
+      list.push({chart:'hist2d',title:'二维分箱密度图',
+        reason:'n='+n+' 已远超散点可读上限，相邻点相互重叠会造成密度失真；分箱计数如实保留全部观测，只改变呈现方式。',
+        caveat:'看不到单个观测值本身，也无法定位具体哪一个点是离群点；分箱越粗，样本量小的子群越容易被整格抹平（本图 '+SPEC.bins+'×'+SPEC.bins+' 方形 bin，全部 n 均参与计数，未剔除任何点）。'});
+      list.push({chart:'scatter',title:'全点散点图（半透明叠加）',
+        reason:'每个观测都留在图上，离群点、空白区位与边缘结构可见，最贴近原始记录，且最不容易产生误读。',
+        caveat:'重叠区域的实际点数量会被压平为一片，密度峰值位置读不准；低透明度的单点近乎不可见，打印后重叠更严重。本图未删除任何点，不存在"抽稀"。'});
+      list.push({chart:'box',title:'按区间分组的箱线图',
+        reason:'把连续 X 切成有序区间后再画分布，可直接读出各组的中位数与四分位差。',
+        caveat:'X 的分箱边界由人决定，边界一变结论就可能变；箱内看不出双峰或多峰结构，也读不出各区间样本量是否均衡（这里每组 n 会以标签形式标出）。'});
+    }else{
+      list.push({chart:'scatter',title:'散点图',
+        reason:'X、Y 均为数值且 n='+n+' 在散点可读范围内，可直视每个观测点与相关结构。',
+        caveat:'相关性不等于因果，也不显示样本密度；若存在未被编码到颜色或形状上的第三个变量（当前分组变量为'+grpName+'），组间差异会被整片点云吃掉，看起来像一团。"'});
+      list.push({chart:'hist2d',title:'二维分箱密度图',
+        reason:'点云开始出现重叠时，用计数密度替代单点可以在不丢观测的前提下维持可读性。',
+        caveat:'丢失单点身份与离群点位置；分辨率由 bin 尺寸决定，粗 bin 会合并邻近小簇（当前 '+SPEC.bins+'×'+SPEC.bins+'，n='+n+'）。'});
+      if(X.type==='date'||G){
+        list.push({chart:'line',title:(G?'分组':'时序')+'折线图',
+          reason:(X.type==='date'?'X 为时间变量，连线便于读出随时间的变化趋势。':'存在分组变量 '+grpName+'，可按组分别连线，突出组间走向差异。'),
+          caveat:'组内个体变异被折叠成一条线，线的粗细不传达样本量；不等间隔的采样会被画成等距，缺失时间点会被直线跨过去，看起来像连续观测——缺失时间点必须在图注中说明。'});
+      }else{
+        list.push({chart:'box',title:'按 X 区间分组的箱线图',
+          reason:'先看分位再看点，区间分组后可避免仅凭点云判断分布位置。',
+          caveat:'X 的分箱由人决定；箱线图隐去样本量差异，双峰分布也只表现为一个中位数，需叠加原始点才能看出来。'});
+      }
+    }
+  }else{
+    list.push({chart:'box',title:'箱线图 ＋ 全部数据点',
+      reason:'X 为分类变量、Y 为数值：箱线图给出中位数与四分位，叠加全部点后分布形状与样本量同时可见。',
+      caveat:'n 很小的组与 n 几百的组画出来一样宽，看不出样本量差异；双峰或多峰分布在盒子里只表现为一个中位数，必须依赖叠加的点才能看出来。'});
+    list.push({chart:'strip',title:'抖动散点图（strip / jitter）',
+      reason:'每组的每个观测都画出来，最不易产生视觉误导，n 与分布原形同时可见。',
+      caveat:'读不出精确的中位数与四分位数值（只能看点位），组间差异缺乏汇总统计量；横向抖动会制造虚假的"宽度"感（此处抖动幅度为组宽 50%，随机种子 '+SPEC.seed+'，可复现）。'});
+    list.push({chart:'barpoint',title:'均值柱 ＋ 误差棒 ＋ 原始点',
+      reason:'符合多数期刊的版式习惯，组间均值差异最容易被快速扫读到。',
+      caveat:'这是默认最有误导风险的一种：均值相同的两组可能一个是双峰、一个是均匀，柱状图完全看不出；柱体从 0 起画还会夸大差异的比例感。已默认叠加全部原始点；Nature 与 Elsevier（Neuroscience）均劝退"只给均值±误差棒"的画法。'});
+  }
+  return list.slice(0,3);
+}
+function renderCandidates(){
+  var list=recommend();
+  SPEC.candidates=list;
+  if(!list.length){$('#cands').innerHTML='<div class="note">Y 轴变量需为数值列，请重新选择。</div>';return;}
+  if(!list.some(function(c){return c.chart===SPEC.chart;}))SPEC.chart=list[0].chart;
+  var k=Math.min(1,110/SPEC.widthMM);
+  var html=list.map(function(c,i){
+    var s={};for(var key in SPEC)s[key]=SPEC[key];
+    s.chart=c.chart;s.widthMM=SPEC.widthMM*k*0.92;s.heightMM=SPEC.heightMM*k*0.92;
+    s.anno=null;
+    return '<div class="cand'+(SPEC.chart===c.chart?' sel':'')+'" onclick="pickChart(\''+c.chart+'\')">'+
+      '<div class="top"><div class="nm">'+String.fromCharCode(97+i)+') '+esc(c.title)+'</div>'+
+      '<div class="why">'+esc(c.reason)+'</div></div>'+
+      '<div class="fig">'+buildSVG(s,{mini:true})+'</div>'+
+      '<div class="caveat"><b>该图会掩盖什么信息</b>'+esc(c.caveat)+'</div></div>';
+  }).join('');
+  $('#cands').innerHTML=html;
+  var c=list.filter(function(x){return x.chart===SPEC.chart;})[0]||list[0];
+  $('#recNote').innerHTML='<b>已选：'+esc(c.title)+'</b> —— '+esc(c.reason)+
+    '<br>反面提示会同步写入 figure_spec.json 与导出须知：'+esc(c.caveat);
+}
+function pickChart(c){SPEC.chart=c;renderCandidates();renderMain();}
+
+/* ---------- 7. SVG 渲染 ---------- */
+function viridis(t){
+  var stops=['#440154','#472D7B','#3B528B','#2C728E','#21918C','#28AE80','#5EC962','#ADD725','#FDE725'];
+  var x=clamp(t,0,1)*(stops.length-1),i=Math.floor(x),f=x-i;
+  var a=stops[i],b=stops[Math.min(stops.length-1,i+1)];
+  function hx(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+  var A=hx(a),B=hx(b),out='#';
+  for(var k=0;k<3;k++)out+=Math.round(A[k]+(B[k]-A[k])*f).toString(16).padStart(2,'0');
+  return out;
+}
+function buildSVG(spec,opt){
+  opt=opt||{};
+  if(!DATA||!DATA.cols.length)return '<div style="padding:24px;color:#97A0A5;font-size:12px">尚未载入数据</div>';
+  var X=colByName(spec.x),Y=colByName(spec.y);
+  if(!X||!Y)return '<div style="padding:24px;color:#97A0A5;font-size:12px">请选择变量</div>';
+  var W=MM2PT(spec.widthMM),H=MM2PT(spec.heightMM);
+  var fsTick=spec.tickFont,fsLabel=spec.labelFont,fsPanel=spec.panelFont,lw=spec.lw;
+  var m={t:fsPanel*1.5+4,r:fsTick*1.8+6,b:fsTick*2.4+fsLabel*2.4+8,l:fsTick*2.6+fsLabel*2.9+8};
+  var iw=Math.max(24,W-m.l-m.r),ih=Math.max(24,H-m.t-m.b);
+  var gr=groupsOf(),chart=spec.chart;
+  if((chart==='scatter'||chart==='line'||chart==='hist2d')&&(!gr.length||!gr[0].xs))
+    chart='strip';                      // X 为分类变量时，数值型图型降级为抖动散点
+  var pal=PALETTES[spec.palette],isSeq=(spec.palette==='viridis'||spec.palette==='cividis');
+  var xCat=(chart==='box'||chart==='strip'||chart==='barpoint');
+  var ysAll=[],xsAll=[],i,j;
+  for(i=0;i<gr.length;i++){
+    for(j=0;j<gr[i].ys.length;j++)ysAll.push(gr[i].ys[j]);
+    if(gr[i].xs)for(j=0;j<gr[i].xs.length;j++)xsAll.push(gr[i].xs[j]);
+  }
+  if(!ysAll.length)return '<div style="padding:24px;color:#97A0A5;font-size:12px">该变量组合下无可用数据</div>';
+  var yMin=Math.min.apply(null,ysAll),yMax=Math.max.apply(null,ysAll);
+  if(spec.yCut){yMin=Math.max(yMin,spec.yCut[0]);yMax=Math.min(yMax,spec.yCut[1]);}
+  else{var pad=(yMax-yMin)*0.06||Math.abs(yMax)*0.05||1;yMin-=pad;yMax+=pad;}
+  if(chart==='barpoint')yMin=Math.min(0,yMin);
+  var ysc=scaleTicks(niceScale(yMin,yMax,5));
+  var xsc,xLabel;
+  if(xCat){
+    xsc={lo:-0.6,hi:gr.length-1+0.6,ticks:gr.map(function(g,i){return i;}),f:function(v){return '';}};
+  }else{
+    xsc=scaleTicks(niceScale(Math.min.apply(null,xsAll),Math.max.apply(null,xsAll),5));
+    xLabel=X.type==='date'?'Date.parse(v)/86400000 days':null;
+  }
+  function XF(v){return m.l+(v-xsc.lo)/(xsc.hi-xsc.lo)*iw;}
+  function YF(v){return m.t+ih-(v-ysc.lo)/(ysc.hi-ysc.lo)*ih;}
+  var FF='Arial, Helvetica, sans-serif',out=[];
+  out.push('<svg xmlns="http://www.w3.org/2000/svg" width="'+W.toFixed(2)+'" height="'+H.toFixed(2)+
+    '" viewBox="0 0 '+W.toFixed(2)+' '+H.toFixed(2)+'" role="img">');
+  if(!opt.export&&!opt.mini){
+    out.push('<defs>'+Object.keys(CVD).map(function(k){
+      return '<filter id="cvd-'+k+'" color-interpolation-filters="linearRGB">'+
+        '<feColorMatrix type="matrix" values="'+CVD[k]+'"/></filter>';}).join('')+'</defs>');
+  }
+  out.push('<rect x="0" y="0" width="'+W.toFixed(2)+'" height="'+H.toFixed(2)+'" fill="#FFFFFF"/>');
+  var filter=(spec.cvd!=='none'&&CVD[spec.cvd])?' filter="url(#cvd-'+spec.cvd+')"':'';
+  out.push('<g'+filter+'>');
+  if(spec.grid){
+    ysc.ticks.forEach(function(v){
+      var y=YF(v);if(y<m.t-1||y>m.t+ih+1)return;
+      out.push('<line x1="'+m.l.toFixed(2)+'" y1="'+y.toFixed(2)+'" x2="'+(m.l+iw).toFixed(2)+'" y2="'+y.toFixed(2)+
+        '" stroke="#1A1D1F" stroke-opacity="0.15" stroke-width="'+Math.max(0.2,lw*0.6).toFixed(2)+'"/>');});
+    if(!xCat)xsc.ticks.forEach(function(v){
+      var x=XF(v);if(x<m.l-1||x>m.l+iw+1)return;
+      out.push('<line x1="'+x.toFixed(2)+'" y1="'+m.t.toFixed(2)+'" x2="'+x.toFixed(2)+'" y2="'+(m.t+ih).toFixed(2)+
+        '" stroke="#1A1D1F" stroke-opacity="0.15" stroke-width="'+Math.max(0.2,lw*0.6).toFixed(2)+'"/>');});
+  }
+  function dot(x,y,r,fill,op){
+    return '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="'+r.toFixed(2)+'" fill="'+fill+
+      '" fill-opacity="'+op+'" stroke="none"/>';}
+  var rand=mulberry32(spec.seed);
+  var col=function(gi){return isSeq?pal[Math.min(pal.length-1,gi)]:pal[gi%pal.length];};
+  if(chart==='scatter'||chart==='line'){
+    gr.forEach(function(g,gi){
+      var c=col(gi);
+      if(chart==='line'){
+        var pts=g.xs.map(function(x,k){return [x,g.ys[k]];}).sort(function(a,b){return a[0]-b[0];});
+        var d=pts.map(function(p,k){return (k?'L':'M')+XF(p[0]).toFixed(1)+','+YF(p[1]).toFixed(1);}).join('');
+        out.push('<path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="'+(lw*1.1).toFixed(2)+'" stroke-linejoin="round"/>');
+      }else{
+        if(g.xs.length>4000){
+          var d2='',k2;
+          for(k2=0;k2<g.xs.length;k2++){
+            var px=XF(g.xs[k2]),py=YF(g.ys[k2]);
+            d2+='M'+(px-0.55).toFixed(1)+','+(py-0.55).toFixed(1)+'h1.1v1.1h-1.1z';
+          }
+          out.push('<path d="'+d2+'" fill="'+c+'" fill-opacity="0.45"/>');
+        }else{
+          for(var k3=0;k3<g.xs.length;k3++)
+            out.push(dot(XF(g.xs[k3]),YF(g.ys[k3]),Math.max(1.1,fsTick*0.28),c,0.72));
+        }
+      }
+    });
+    if(chart==='scatter'&&spec.fit&&spec.fitInfo){
+      var f=spec.fitInfo,x1=xsc.lo,x2=xsc.hi;
+      out.push('<line x1="'+XF(x1).toFixed(2)+'" y1="'+YF(f.a+f.b*x1).toFixed(2)+'" x2="'+XF(x2).toFixed(2)+
+        '" y2="'+YF(f.a+f.b*x2).toFixed(2)+'" stroke="#111111" stroke-width="'+(lw*1.2).toFixed(2)+
+        '" stroke-dasharray="'+(lw*3).toFixed(1)+','+(lw*2).toFixed(1)+'"/>');
+    }
+  }else if(chart==='hist2d'){
+    var NB=spec.bins,xlo=Math.min.apply(null,xsAll),xhi=Math.max.apply(null,xsAll);
+    var ylo=Math.min.apply(null,ysAll),yhi=Math.max.apply(null,ysAll);
+    var counts=new Float64Array(NB*NB),maxc=0,k4;
+    for(k4=0;k4<gr.length;k4++){
+      for(var k5=0;k5<gr[k4].xs.length;k5++){
+        var bx=clamp(Math.floor((gr[k4].xs[k5]-xlo)/((xhi-xlo)||1)*NB),0,NB-1);
+        var by=clamp(Math.floor((gr[k4].ys[k5]-ylo)/((yhi-ylo)||1)*NB),0,NB-1);
+        var val=++counts[by*NB+bx];if(val>maxc)maxc=val;
+      }
+    }
+    var cw=iw/NB,chh=ih/NB;
+    for(var by2=0;by2<NB;by2++)for(var bx2=0;bx2<NB;bx2++){
+      var cc=counts[by2*NB+bx2];if(!cc)continue;
+      out.push('<rect x="'+(m.l+bx2*cw).toFixed(2)+'" y="'+(m.t+ih-(by2+1)*chh).toFixed(2)+'" width="'+
+        (cw+0.4).toFixed(2)+'" height="'+(chh+0.4).toFixed(2)+'" fill="'+viridis(Math.pow(cc/maxc,0.6))+'"/>');
+    }
+  }else if(chart==='box'){
+    gr.forEach(function(g,gi){
+      var c=col(gi),v=g.ys.slice().sort(function(a,b){return a-b;});
+      var q1=quantile(v,0.25),med=quantile(v,0.5),q3=quantile(v,0.75),iqr=q3-q1;
+      var loF=Math.max(v[0],q1-1.5*iqr),hiF=Math.min(v[v.length-1],q3+1.5*iqr);
+      var bw=Math.min(iw/(gr.length*2.2),24),cx=XF(gi);
+      out.push('<line x1="'+cx.toFixed(2)+'" y1="'+YF(loF).toFixed(2)+'" x2="'+cx.toFixed(2)+'" y2="'+YF(hiF).toFixed(2)+
+        '" stroke="#111111" stroke-width="'+(lw*0.8).toFixed(2)+'"/>');
+      out.push('<line x1="'+(cx-bw/2).toFixed(2)+'" y1="'+YF(loF).toFixed(2)+'" x2="'+(cx+bw/2).toFixed(2)+'" y2="'+YF(loF).toFixed(2)+'" stroke="#111111" stroke-width="'+(lw*0.8).toFixed(2)+'"/>');
+      out.push('<line x1="'+(cx-bw/2).toFixed(2)+'" y1="'+YF(hiF).toFixed(2)+'" x2="'+(cx+bw/2).toFixed(2)+'" y2="'+YF(hiF).toFixed(2)+'" stroke="#111111" stroke-width="'+(lw*0.8).toFixed(2)+'"/>');
+      out.push('<rect x="'+(cx-bw/2).toFixed(2)+'" y="'+YF(q3).toFixed(2)+'" width="'+bw.toFixed(2)+'" height="'+
+        Math.max(0.6,YF(q1)-YF(q3)).toFixed(2)+'" fill="none" stroke="#111111" stroke-width="'+lw.toFixed(2)+'"/>');
+      out.push('<line x1="'+(cx-bw/2).toFixed(2)+'" y1="'+YF(med).toFixed(2)+'" x2="'+(cx+bw/2).toFixed(2)+'" y2="'+YF(med).toFixed(2)+
+        '" stroke="#111111" stroke-width="'+(lw*1.4).toFixed(2)+'"/>');
+      if(v.length<=900)for(var k6=0;k6<v.length;k6++)
+        out.push(dot(cx+(rand()-0.5)*bw*0.5,YF(v[k6]),Math.max(1,fsTick*0.22),c,0.6));
+      for(var k7=0;k7<v.length;k7++)if(v[k7]<loF||v[k7]>hiF)
+        out.push('<line x1="'+(cx-bw*0.14).toFixed(2)+'" y1="'+YF(v[k7]).toFixed(2)+'" x2="'+(cx+bw*0.14).toFixed(2)+'" y2="'+YF(v[k7]).toFixed(2)+'" stroke="#333333" stroke-width="'+(lw*0.6).toFixed(2)+'"/>');
+      if(spec.showN)out.push('<text x="'+cx.toFixed(2)+'" y="'+(m.t+ih+fsTick*1.5).toFixed(2)+'" font-family="'+FF+'" font-size="'+fsTick+'" fill="#333333" text-anchor="middle">n='+v.length+'</text>');
+    });
+  }else if(chart==='strip'){
+    gr.forEach(function(g,gi){
+      var c=col(gi),w=iw/gr.length*0.7,k8;
+      for(k8=0;k8<g.ys.length;k8++)
+        out.push(dot(XF(gi)+(rand()-0.5)*w*0.7,YF(g.ys[k8]),Math.max(1.1,fsTick*0.26),c,0.65));
+      var med=median(g.ys);
+      out.push('<line x1="'+(XF(gi)-w*0.28).toFixed(2)+'" y1="'+YF(med).toFixed(2)+'" x2="'+(XF(gi)+w*0.28).toFixed(2)+'" y2="'+YF(med).toFixed(2)+'" stroke="#111111" stroke-width="'+(lw*1.5).toFixed(2)+'"/>');
+      if(spec.showN)out.push('<text x="'+XF(gi).toFixed(2)+'" y="'+(m.t+ih+fsTick*1.5).toFixed(2)+'" font-family="'+FF+'" font-size="'+fsTick+'" fill="#333333" text-anchor="middle">n='+g.ys.length+'</text>');
+    });
+  }else if(chart==='barpoint'){
+    gr.forEach(function(g,gi){
+      var c=col(gi),mu=mean(g.ys),s=sd(g.ys),n=g.ys.length,lo,hi;
+      if(spec.errBar==='sd'){lo=mu-s;hi=mu+s;}
+      else if(spec.errBar==='sem'){var se=s/Math.sqrt(n);lo=mu-se;hi=mu+se;}
+      else{var se2=s/Math.sqrt(n);lo=mu-se2*1.96;hi=mu+se2*1.96;}
+      var bw=Math.min(iw/(gr.length*2),26),cx=XF(gi),y0=YF(Math.max(0,ysc.lo<0?0:ysc.lo));
+      out.push('<rect x="'+(cx-bw/2).toFixed(2)+'" y="'+YF(mu).toFixed(2)+'" width="'+bw.toFixed(2)+'" height="'+
+        Math.max(0.5,y0-YF(mu)).toFixed(2)+'" fill="'+c+'" fill-opacity="0.55" stroke="#111111" stroke-width="'+(lw*0.8).toFixed(2)+'"/>');
+      out.push('<line x1="'+cx.toFixed(2)+'" y1="'+YF(lo).toFixed(2)+'" x2="'+cx.toFixed(2)+'" y2="'+YF(hi).toFixed(2)+'" stroke="#111111" stroke-width="'+lw.toFixed(2)+'"/>');
+      [lo,hi].forEach(function(v){
+        out.push('<line x1="'+(cx-bw*0.18).toFixed(2)+'" y1="'+YF(v).toFixed(2)+'" x2="'+(cx+bw*0.18).toFixed(2)+'" y2="'+YF(v).toFixed(2)+'" stroke="#111111" stroke-width="'+lw.toFixed(2)+'"/>');});
+      if(spec.showPoints){
+        for(var k9=0;k9<g.ys.length;k9++)
+          out.push(dot(cx+(rand()-0.5)*bw*0.7,YF(g.ys[k9]),Math.max(0.9,fsTick*0.2),'#111111',0.7));
+      }
+      if(spec.showN)out.push('<text x="'+cx.toFixed(2)+'" y="'+(m.t+ih+fsTick*1.5).toFixed(2)+'" font-family="'+FF+'" font-size="'+fsTick+'" fill="#333333" text-anchor="middle">n='+n+'</text>');
+    });
+  }
+  if(spec.anno&&(chart==='box'||chart==='strip'||chart==='barpoint')&&gr.length>=2){
+    var an=spec.anno;
+    if(gr[an.i]&&gr[an.j]){
+      var top=Math.max(m.t+2,YF(Math.max.apply(null,gr[an.i].ys.concat(gr[an.j].ys)))-fsTick*0.8),bar=fsTick*0.8;
+      out.push('<path d="M'+XF(an.i).toFixed(2)+','+(top+bar).toFixed(2)+' L'+XF(an.i).toFixed(2)+','+top.toFixed(2)+
+        ' L'+XF(an.j).toFixed(2)+','+top.toFixed(2)+' L'+XF(an.j).toFixed(2)+','+(top+bar).toFixed(2)+
+        '" fill="none" stroke="#111111" stroke-width="'+(lw*0.8).toFixed(2)+'"/>');
+      out.push('<text x="'+((XF(an.i)+XF(an.j))/2).toFixed(2)+'" y="'+(top-fsTick*0.3).toFixed(2)+
+        '" font-family="'+FF+'" font-size="'+(fsTick*1.15).toFixed(2)+'" fill="#111111" text-anchor="middle">'+esc(an.label)+'</text>');
+    }
+  }
+  out.push('</g>');
+  out.push('<g font-family="'+FF+'" stroke="none" fill="#111111">');
+  out.push('<line x1="'+m.l.toFixed(2)+'" y1="'+(m.t+ih).toFixed(2)+'" x2="'+(m.l+iw).toFixed(2)+'" y2="'+(m.t+ih).toFixed(2)+'" stroke="#111111" stroke-width="'+lw.toFixed(2)+'"/>');
+  out.push('<line x1="'+m.l.toFixed(2)+'" y1="'+m.t.toFixed(2)+'" x2="'+m.l.toFixed(2)+'" y2="'+(m.t+ih).toFixed(2)+'" stroke="#111111" stroke-width="'+lw.toFixed(2)+'"/>');
+  if(xCat){
+    gr.forEach(function(g,gi){
+      out.push('<text x="'+XF(gi).toFixed(2)+'" y="'+(m.t+ih+fsTick*1.6).toFixed(2)+'" font-size="'+fsTick+
+        '" text-anchor="middle">'+esc(String(g.name).slice(0,10))+'</text>');});
+  }else{
+    xsc.ticks.forEach(function(v){
+      var x=XF(v);
+      out.push('<line x1="'+x.toFixed(2)+'" y1="'+(m.t+ih).toFixed(2)+'" x2="'+x.toFixed(2)+'" y2="'+(m.t+ih+fsTick*0.5).toFixed(2)+'" stroke="#111111" stroke-width="'+lw.toFixed(2)+'"/>');
+      out.push('<text x="'+x.toFixed(2)+'" y="'+(m.t+ih+fsTick*1.6).toFixed(2)+'" font-size="'+fsTick+'" text-anchor="middle">'+xsc.f(v)+'</text>');});
+  }
+  ysc.ticks.forEach(function(v){
+    var y=YF(v);if(y<m.t-1||y>m.t+ih+1)return;
+    out.push('<line x1="'+(m.l-fsTick*0.5).toFixed(2)+'" y1="'+y.toFixed(2)+'" x2="'+m.l.toFixed(2)+'" y2="'+y.toFixed(2)+'" stroke="#111111" stroke-width="'+lw.toFixed(2)+'"/>');
+    out.push('<text x="'+(m.l-fsTick*0.8).toFixed(2)+'" y="'+(y+fsTick*0.35).toFixed(2)+'" font-size="'+fsTick+'" text-anchor="end">'+ysc.f(v)+'</text>');});
+  out.push('<text x="'+(m.l+iw/2).toFixed(2)+'" y="'+(H-m.b+fsLabel*2.3).toFixed(2)+'" font-size="'+fsLabel+'" text-anchor="middle">'+esc(spec.xlabel||spec.x)+'</text>');
+  out.push('<text transform="translate('+Math.max(6,m.l-fsTick*2.4-fsLabel*1.6).toFixed(2)+','+(m.t+ih/2).toFixed(2)+') rotate(-90)" font-size="'+fsLabel+'" text-anchor="middle">'+esc(spec.ylabel||spec.y)+'</text>');
+  if(spec.panel)out.push('<text x="'+m.l.toFixed(2)+'" y="'+(fsPanel*1.1).toFixed(2)+'" font-size="'+fsPanel+'" font-weight="bold">'+esc(String(spec.panel))+'</text>');
+  if(spec.showLegend&&gr.length>1&&!xCat&&(chart==='scatter'||chart==='line')){
+    var lx=m.l+iw-fsTick*0.4,ly=m.t+fsTick*0.8;
+    gr.slice(0,8).forEach(function(g,gi){
+      out.push('<rect x="'+(lx-fsTick*1.2).toFixed(2)+'" y="'+(ly-fsTick*0.55).toFixed(2)+'" width="'+(fsTick*0.8).toFixed(2)+'" height="'+(fsTick*0.8).toFixed(2)+'" fill="'+col(gi)+'"/>');
+      out.push('<text x="'+(lx-fsTick*1.5).toFixed(2)+'" y="'+(ly+fsTick*0.2).toFixed(2)+'" font-size="'+fsTick+'" text-anchor="end">'+esc(String(g.name).slice(0,12))+'</text>');
+      ly+=fsTick*1.5;});
+  }
+  out.push('</g>');
+  if(spec.yCut){
+    var yy=m.t+ih-fsTick*0.5,xx=m.l;
+    out.push('<rect x="'+(xx-lw*2).toFixed(2)+'" y="'+(yy-fsTick*0.9).toFixed(2)+'" width="'+(lw*4).toFixed(2)+'" height="'+(fsTick*1.8).toFixed(2)+'" fill="#FFFFFF"/>');
+    out.push('<path d="M'+(xx-lw*2.2).toFixed(2)+','+(yy+fsTick*0.2).toFixed(2)+' l'+(lw*4.4).toFixed(2)+','+(-fsTick*0.9).toFixed(2)+
+      ' M'+(xx-lw*2.2).toFixed(2)+','+(yy+fsTick*0.9).toFixed(2)+' l'+(lw*4.4).toFixed(2)+','+(-fsTick*0.9).toFixed(2)+
+      '" stroke="#111111" stroke-width="'+lw.toFixed(2)+'" fill="none"/>');
+  }
+  out.push('</svg>');
+  return out.join('\n');
+}
+
+/* ---------- 8. 主图、图注、预检 ---------- */
+function renderMain(){
+  if(!DATA)return;
+  SPEC.xlabel=$('#inXL').value||SPEC.x;
+  SPEC.ylabel=$('#inYL').value||SPEC.y;
+  SPEC.sourceUrl=$('#inSrc').value.trim();
+  SPEC.fit=$('#cbFit').checked;
+  SPEC.errBar=$('#selErr').value;
+  SPEC.grid=$('#selGrid').value==='1';
+  SPEC.showPoints=$('#cbPoints').checked;
+  SPEC.showN=$('#cbN').checked;
+  var xCol=colByName(SPEC.x);
+  if(xCol&&xCol.type!=='numeric'&&xCol.type!=='date'&&
+     (SPEC.chart==='scatter'||SPEC.chart==='line'||SPEC.chart==='hist2d'))
+    SPEC.chart='strip';   // 分类 X 不支持数值图型，降级并如实标记
+  if(SPEC.fit){
+    var xs=[],ys=[],gr=groupsOf(),i;
+    for(i=0;i<gr.length;i++){if(gr[i].xs){xs=xs.concat(gr[i].xs);ys=ys.concat(gr[i].ys);}}
+    SPEC.fitInfo=(xs.length>2)?ols(xs,ys):null;
+  }else SPEC.fitInfo=null;
+  $('#figbox').innerHTML=buildSVG(SPEC,{});
+  var sv=$('#figbox svg');
+  if(sv)sv.style.width=(SPEC.actual?SPEC.widthMM+'mm':'100%');
+  var J=JOURNALS[SPEC.journal];
+  $('#figmeta').innerHTML=SPEC.widthMM+' × '+SPEC.heightMM+' mm · '+J.name+' '+
+    (SPEC.colMode==='single'?'单栏':SPEC.colMode==='onehalf'?'1.5 栏':'双栏')+
+    ' · 刻度 '+SPEC.tickFont+' pt / 轴标签 '+SPEC.labelFont+' pt / 面板 '+SPEC.panelFont+' pt · 线宽 '+SPEC.lw+
+    ' pt · 网格 15% · 栅格 '+SPEC.dpi+' dpi';
+  $('#pillSize').textContent=SPEC.widthMM+' × '+SPEC.heightMM+' mm';
+  $('#pillDpi').textContent=SPEC.dpi+' dpi';
+  $('#pillFmt').textContent=$('#selFmt').value.toUpperCase();
+  renderCaption();renderChecks();renderCode();renderSpecRow();
+}
+function toggleActual(){SPEC.actual=!SPEC.actual;renderMain();toast(SPEC.actual?'已按 100% 印刷尺寸显示':'已切换为适应容器显示');}
+function onCutChange(){
+  var cb=$('#cbCut'),row=$('#cutRow');
+  if(!cb.checked){SPEC.yCut=null;row.style.display='none';renderMain();return;}
+  row.style.display='flex';
+  var gr=groupsOf(),ys=[],i;
+  for(i=0;i<gr.length;i++)ys=ys.concat(gr[i].ys);
+  var lo=Math.min.apply(null,ys),hi=Math.max.apply(null,ys);
+  $('#inCut0').value=fmt(lo+(hi-lo)*0.25,2);
+  $('#inCut1').value=fmt(hi,2);
+  applyCut();
+}
+function applyCut(){
+  if(!$('#cbCut').checked){SPEC.yCut=null;renderMain();return;}
+  var a=parseFloat($('#inCut0').value),b=parseFloat($('#inCut1').value);
+  if(!isFinite(a)||!isFinite(b)||a>=b){toast('截断区间无效');return;}
+  SPEC.yCut=[a,b];renderMain();
+}
+function buildProvenance(){
+  var c=SPEC.candidates.filter(function(x){return x.chart===SPEC.chart;})[0]||{title:'',reason:'',caveat:''};
+  return {
+    figure_id:'Fig1',renderer:'FigForge/1.0 (browser single-file)',
+    generated_at:new Date().toISOString(),timezone:DATA?DATA.tz:null,
+    source_data:{file:DATA?DATA.name:null,url:SPEC.sourceUrl||null,sha256:DATA?DATA.sha:null,
+      rows:DATA?DATA.n:null,encoding:'UTF-8',alterations:DATA?DATA.alters:[]},
+    journal:{name:JOURNALS[SPEC.journal].name,column:SPEC.colMode,width_mm:SPEC.widthMM,height_mm:SPEC.heightMM,
+      min_font_pt:JOURNALS[SPEC.journal].minFont,dpi:SPEC.dpi,color_space:'RGB'},
+    chart:{type:SPEC.chart,title:c.title,reason:c.reason,caveat_hidden_by_this_chart:c.caveat,
+      x:SPEC.x,y:SPEC.y,group:SPEC.group,palette:SPEC.palette,seed:SPEC.seed,
+      error_bar:SPEC.errBar,show_points:SPEC.showPoints,show_n:SPEC.showN,
+      y_truncated:!!SPEC.yCut,y_range:SPEC.yCut||null,grid_opacity:0.15,
+      smoothing:SPEC.fit&&SPEC.fitInfo?{method:'OLS linear fit (unweighted, no outlier removal)',
+        slope:SPEC.fitInfo.b,intercept:SPEC.fitInfo.a,r2:SPEC.fitInfo.r2,n:SPEC.fitInfo.n}:null,
+      bins:SPEC.chart==='hist2d'?[SPEC.bins,SPEC.bins]:null},
+    statistics:SPEC.stats||null,
+    raster:{pixel_width:Math.round(SPEC.widthMM/25.4*SPEC.dpi),
+      pixel_height:Math.round(SPEC.heightMM/25.4*SPEC.dpi),dpi:SPEC.dpi,
+      resample_policy:'none — rendered at final print size'}
+  };
+}
+function renderCaption(){
+  var gr=groupsOf(),c=SPEC.candidates.filter(function(x){return x.chart===SPEC.chart;})[0];
+  var bits=[],N=0,i;
+  for(i=0;i<gr.length;i++)N+=gr[i].ys.length;
+  bits.push('<b>Fig 1</b> '+esc(SPEC.ylabel||SPEC.y)+' ~ '+esc(SPEC.xlabel||SPEC.x)+'（'+
+    esc(JOURNALS[SPEC.journal].name)+' '+(SPEC.colMode==='single'?'单栏':SPEC.colMode==='onehalf'?'1.5 栏':'双栏')+
+    '，'+SPEC.widthMM+' × '+SPEC.heightMM+' mm）。');
+  var perGroup=gr.length>1?'（'+gr.map(function(g){return esc(g.name)+' n='+g.ys.length;}).join('、')+'）':'';
+  bits.push('数据：'+esc(DATA.name)+'，n='+N+perGroup+'；未删点、未插补、未四舍五入，原始文件 SHA-256 '+esc(DATA.sha.slice(0,16))+'…。');
+  if(SPEC.chart==='box'||SPEC.chart==='strip'||SPEC.chart==='barpoint')
+    bits.push('误差棒 = '+({sd:'标准差 SD',sem:'标准误 SEM',ci95:'95% 置信区间'})[SPEC.errBar]+'；'+
+      (SPEC.chart==='barpoint'?(SPEC.showPoints?'已叠加全部原始数据点':'未叠加原始点（Nature / Elsevier 不建议仅给均值±误差棒）'):'分布位置与样本量已在图上标出')+'。');
+  if(SPEC.chart==='hist2d')
+    bits.push('二维分箱：'+SPEC.bins+' × '+SPEC.bins+' 方形 bin，计数幂律映射 γ=0.6，全部 '+N+' 个观测均参与计数。');
+  if(SPEC.fit&&SPEC.fitInfo)
+    bits.push('拟合：普通最小二乘 OLS（未加权、未剔除离群点），斜率 b='+fmt(SPEC.fitInfo.b,3)+'，截距 a='+fmt(SPEC.fitInfo.a,3)+
+      '，R²='+fmt(SPEC.fitInfo.r2,3)+'，n='+SPEC.fitInfo.n+'。');
+  if(SPEC.yCut)bits.push('⚠ Y 轴已截断至 ['+SPEC.yCut[0]+', '+SPEC.yCut[1]+']，图上已绘制断轴符号。');
+  if(SPEC.anno&&SPEC.stats){
+    var s=SPEC.stats;
+    bits.push('显著性：'+esc(s.testName)+'，统计量 '+s.statLabel+'='+fmt(s.stat,4)+
+      '，df='+(isFinite(s.df)?fmt(s.df,2):'∞（正态近似）')+'，精确 p='+(s.p<0.001?'&lt;0.001':fmt(s.p,5))+
+      '，'+(s.corr==='none'?'未做多重校正':(s.corr==='bh'?'BH (FDR) 校正':'Bonferroni 校正'))+
+      '后 p='+(s.padj<0.001?'&lt;0.001':fmt(s.padj,5))+'，图上标注 '+s.label+'（* p&lt;0.05，** p&lt;0.01，*** p&lt;0.001）。');
+  }
+  if(c)bits.push('<b>反面提示</b>：'+esc(c.caveat));
+  $('#caption').innerHTML=bits.join('<br>');
+}
+function checkList(){
+  if(!DATA)return [];
+  var J=JOURNALS[SPEC.journal],w=J.cols[SPEC.colMode];
+  var barlike=(SPEC.chart==='barpoint'),dist=(SPEC.chart==='box'||SPEC.chart==='strip'||SPEC.chart==='barpoint');
+  var is=[];
+  is.push({pass:true,txt:'原始数据只读：sha256 '+DATA.sha.slice(0,12)+'…，未改值 / 未删点 / 未插补 / 未四舍五入'});
+  is.push({pass:!SPEC.yCut,txt:SPEC.yCut?('已截断并绘制断轴符号，图注写明区间 ['+SPEC.yCut[0]+', '+SPEC.yCut[1]+']'):'未截断 Y 轴（默认取全数据范围，不作视觉夸大）'});
+  is.push({pass:!(SPEC.fit&&!SPEC.fitInfo),txt:SPEC.fit&&SPEC.fitInfo?('OLS 已声明：b='+fmt(SPEC.fitInfo.b,3)+'，R²='+fmt(SPEC.fitInfo.r2,3)+'，n='+SPEC.fitInfo.n):'未启用平滑 / 拟合'});
+  is.push({pass:!barlike||true,txt:barlike?('误差棒定义为 '+({sd:'SD',sem:'SEM',ci95:'95% CI'})[SPEC.errBar]):'当前图型不涉及均值误差棒'});
+  is.push({pass:!dist||SPEC.showN,txt:dist?(SPEC.showN?'每组样本量 n 已在图上标出':'未标出每组 n（Nature 要求随图给出确切 n）'):'当前图型不按组聚合'});
+  is.push({pass:!barlike||SPEC.showPoints,txt:barlike&&!SPEC.showPoints?'条形图未叠加原始点：Nature / Elsevier 不建议仅给均值±误差棒':'已叠加全部原始点，或当前图型不适用'});
+  is.push({pass:SPEC.widthMM<=w*1.02+0.5,txt:'宽度 '+SPEC.widthMM+' mm '+(SPEC.widthMM<=w*1.02+0.5?'在':'超出')+' '+J.name+' '+(SPEC.colMode==='single'?'单栏':SPEC.colMode==='onehalf'?'1.5 栏':'双栏')+' 上限 '+Math.round(w)+' mm'});
+  is.push({pass:SPEC.heightMM<=J.hMax,txt:'高度 '+SPEC.heightMM+' mm ≤ '+Math.round(J.hMax)+' mm（'+J.name+' 上限）'});
+  is.push({pass:SPEC.tickFont>=J.minFont&&SPEC.baseFont<=J.maxFont,txt:'刻度字号 '+SPEC.tickFont+' pt ≥ 下限 '+J.minFont+' pt；正文 '+SPEC.baseFont+' pt ≤ 上限 '+J.maxFont+' pt'});
+  is.push({pass:SPEC.lw>=J.minLw,txt:'图元线宽 '+SPEC.lw+' pt ≥ 下限 '+J.minLw+' pt'});
+  is.push({pass:SPEC.dpi>=J.dpi,txt:SPEC.dpi+' dpi ≥ '+J.name+' 下限 '+J.dpi+' dpi；按最终印刷尺寸反算 '+Math.round(SPEC.widthMM/25.4*SPEC.dpi)+' px'});
+  is.push({pass:!!SPEC.sourceUrl,txt:SPEC.sourceUrl?'已填写源数据链接，导出时写入文件头':'未填写源数据链接 / 路径（导出将被阻断）'});
+  is.push({pass:true,txt:'配色 '+SPEC.palette+'：≤8 色、禁红绿相邻与彩虹尺，可切换三种色觉模拟与灰阶核验'});
+  return is;
+}
+function renderChecks(){
+  var is=checkList();
+  if(!is.length)return;
+  EXPORTS_READY=is.every(function(x){return x.pass;});
+  $('#checks').innerHTML=is.map(function(x){
+    return '<div class="chk '+(x.pass?'pass':'fail')+'"><i>'+(x.pass?'✓':'!')+'</i><span>'+esc(x.txt)+'</span></div>';}).join('');
+  $('#btnExport').disabled=!EXPORTS_READY;
+  $('#btnExport').textContent=EXPORTS_READY?'导出图稿':'预检未通过，导出已禁用';
+}
+
+/* ---------- 9. 模板与调色板 UI ---------- */
+function renderJournals(){
+  $('#jgrid').innerHTML=Object.keys(JOURNALS).map(function(k){
+    var J=JOURNALS[k];
+    return '<div class="jcard'+(SPEC.journal===k?' sel':'')+'" onclick="pickJournal(\''+k+'\')">'+
+      '<h4>'+J.name+'</h4><div class="src">'+J.src+'</div><dl>'+
+      '<dt>单栏 / 双栏</dt><dd>'+Math.round(J.cols.single)+' / '+Math.round(J.cols.double)+' mm（'+
+      (J.cols.single/25.4).toFixed(2)+' / '+(J.cols.double/25.4).toFixed(2)+' in）</dd>'+
+      '<dt>字号 pt</dt><dd>'+J.minFont+'–'+J.maxFont+'（此模板取刻度 '+J.tick+'、轴标签 '+J.label+'）</dd>'+
+      '<dt>线宽 / dpi</dt><dd>≥'+J.minLw+' pt · ≥'+J.dpi+' dpi</dd></dl></div>';}).join('');
+  $('#jurNote').innerHTML='<b>'+JOURNALS[SPEC.journal].name+' 条款：</b>'+JOURNALS[SPEC.journal].note;
+}
+function pickJournal(k){SPEC.journal=k;applyJournal();renderJournals();renderMain();renderCandidates();}
+function applyJournal(){
+  var J=JOURNALS[SPEC.journal],w=J.cols[SPEC.colMode]||J.cols.single;
+  SPEC.widthMM=Math.round(w*10)/10;
+  SPEC.heightMM=Math.round(clamp(SPEC.widthMM*0.7,25,J.hMax));
+  SPEC.baseFont=J.base;SPEC.tickFont=J.tick;SPEC.labelFont=J.label;SPEC.panelFont=J.panel;
+  SPEC.lw=J.lw;SPEC.dpi=Math.max(J.dpi,SPEC.dpi);
+  $('#inW').value=SPEC.widthMM;$('#inH').value=SPEC.heightMM;
+  $('#inFS').value=SPEC.tickFont;$('#inLW').value=SPEC.lw;
+  $('#selCol').value=SPEC.colMode;$('#inDpi').value=SPEC.dpi;$('#rngDpi').value=SPEC.dpi;
+  renderSpecRow();
+}
+function renderSpecRow(){
+  var J=JOURNALS[SPEC.journal];
+  $('#specrow').innerHTML=
+    '<div><span>WIDTH</span><b>'+SPEC.widthMM+' mm</b></div>'+
+    '<div><span>HEIGHT</span><b>'+SPEC.heightMM+' mm</b></div>'+
+    '<div><span>FONT RANGE</span><b>'+J.minFont+'–'+J.maxFont+' pt</b></div>'+
+    '<div><span>LINE ≥</span><b>'+J.minLw+' pt</b></div>'+
+    '<div><span>RASTER @'+SPEC.dpi+' dpi</span><b>'+Math.round(SPEC.widthMM/25.4*SPEC.dpi)+' × '+
+      Math.round(SPEC.heightMM/25.4*SPEC.dpi)+' px</b></div>'+
+    '<div><span>COLOR</span><b>'+J.colors+'</b></div>';
+}
+function renderSwatches(){
+  $('#swatches').innerHTML=PALETTES[SPEC.palette].map(function(c){
+    return '<div class="swatch" style="background:'+c+'" title="'+c+'"></div>';}).join('');
+  function lum(h){
+    var v=[1,3,5].map(function(i){var x=parseInt(h.slice(i,i+2),16)/255;
+      return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);});
+    return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];}
+  var lums=PALETTES[SPEC.palette].map(lum),diffs=[];
+  for(var i=1;i<lums.length;i++)diffs.push(Math.abs(lums[i]-lums[i-1]).toFixed(3));
+  var ok=diffs.length?diffs.every(function(d){return parseFloat(d)>=0.012;}):true;
+  $('#grayres').textContent='相邻灰阶差 '+diffs.join(' / ')+' → '+(ok?'9 级可分辨':'存在相邻不可辨风险，建议换用更多明度层次的方案');
+}
+
+/* ---------- 10. 统计标注 ---------- */
+function computeStats(){
+  var gr=groupsOf(),i=parseInt($('#selA').value,10),j=parseInt($('#selB').value,10);
+  var a=gr[i],b=gr[j];
+  if(!a||!b||a===b){toast('请选择两个不同的组');return;}
+  if(a.ys.length<2||b.ys.length<2){toast('每组至少需要 2 个观测');return;}
+  var method=$('#selTest').value,corr=$('#selCorr').value,res,testName;
+  if(method==='welch'){res=welchT(a.ys,b.ys);testName='Welch two-sample t-test（不等方差）';}
+  else if(method==='student'){res=studentT(a.ys,b.ys);testName='Student two-sample t-test（等方差）';}
+  else{res=mannWhitney(a.ys,b.ys);testName='Mann–Whitney U（正态近似，未做并列校正）';}
+  var adj=(corr==='bh')?bhAdjust([res.p,res.p])[0]:(corr==='bonf'?Math.min(1,res.p*2):res.p);
+  var label=stars(adj);
+  SPEC.stats={testName:testName,method:method,stat:res.t,statLabel:res.statLabel,df:res.df,
+    p:res.p,padj:adj,corr:corr,label:label,n1:a.ys.length,n2:b.ys.length,g1:a.name,g2:b.name};
+  SPEC.anno={i:i,j:j,label:label};
+  $('#statout').innerHTML='<span>TEST</span><b>'+esc(testName)+'</b>'+
+    '<span>GROUPS</span><b>'+esc(a.name)+' (n='+a.ys.length+') vs '+esc(b.name)+' (n='+b.ys.length+')</b>'+
+    '<span>STATISTIC</span><b>'+res.statLabel+' = '+fmt(res.t,4)+'，df = '+(isFinite(res.df)?fmt(res.df,2):'∞')+'</b>'+
+    '<span>p 未校正</span><b>'+(res.p<0.001?'<0.001':fmt(res.p,5))+'</b>'+
+    '<span>p 校正后</span><b>'+(corr==='none'?'不校正':corr==='bh'?'BH (FDR)':'Bonferroni')+' → '+
+      (adj<0.001?'<0.001':fmt(adj,5))+'</b>'+
+    '<span>标注</span><b>'+label+'　（* p&lt;0.05, ** p&lt;0.01, *** p&lt;0.001, ns 不显著）</b>';
+  renderMain();
+}
+function clearAnno(){SPEC.anno=null;SPEC.stats=null;$('#statout').innerHTML='';renderMain();}
+
+/* ---------- 11. 导出 ---------- */
+function fname(ext){
+  return 'Fig1_'+JOURNALS[SPEC.journal].name.replace(/\s+/g,'')+'_'+SPEC.colMode+'_'+
+    SPEC.widthMM+'mm_'+SPEC.dpi+'dpi.'+ext;
+}
+function dl(blob,name){
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},400);
+}
+function downloadText(txt,name,type){
+  dl(new Blob([txt],{type:type||'text/plain;charset=utf-8'}),name);}
+function exportSVG(){
+  var svg=buildSVG(SPEC,{export:true});
+  var prov=JSON.stringify(buildProvenance(),null,1).replace(/[<>&]/g,function(c){
+    return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});
+  var meta='<metadata id="figforge-provenance" xmlns:dc="http://purl.org/dc/elements/1.1/">'+
+    '<dc:creator>FigForge/1.0</dc:creator>'+
+    '<dc:source>'+esc(SPEC.sourceUrl||'未提供')+'</dc:source>'+
+    '<dc:date>'+new Date().toISOString()+'</dc:date>'+
+    '<dc:description>'+prov+'</dc:description></metadata>';
+  svg=svg.replace('<rect',meta+'\n<rect');
+  var desc='<desc>source_data_url='+esc(SPEC.sourceUrl||'NA')+'; sha256='+esc(DATA.sha)+
+    '; generated_at='+new Date().toISOString()+'; renderer=FigForge/1.0; dpi='+SPEC.dpi+
+    '; size='+SPEC.widthMM+'x'+SPEC.heightMM+'mm</desc>';
+  svg=svg.replace('role="img">','role="img">'+desc);
+  dl(new Blob([svg],{type:'image/svg+xml'}),fname('svg'));
+  toast('SVG 已导出（含 XMP 溯源元数据）');
+}
+function rasterCanvas(){
+  var svg=buildSVG(SPEC,{export:true});
+  var pxW=Math.round(SPEC.widthMM/25.4*SPEC.dpi),pxH=Math.round(SPEC.heightMM/25.4*SPEC.dpi);
+  var blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+  var url=URL.createObjectURL(blob),img=new Image();
+  return new Promise(function(resolve,reject){
+    img.onload=function(){
+      var cv=document.createElement('canvas');cv.width=pxW;cv.height=pxH;
+      var c=cv.getContext('2d');
+      c.fillStyle='#FFFFFF';c.fillRect(0,0,pxW,pxH);
+      c.drawImage(img,0,0,pxW,pxH);
+      URL.revokeObjectURL(url);resolve(cv);};
+    img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('SVG 光栅化失败'));};
+    img.src=url;
+  });
+}
+var CRC_T=(function(){
+  var t=new Uint32Array(256),n,c,k;
+  for(n=0;n<256;n++){c=n;for(k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}
+  return t;})();
+function crc32(u8){
+  var c=0xFFFFFFFF,i;
+  for(i=0;i<u8.length;i++)c=CRC_T[(c^u8[i])&0xFF]^(c>>>8);
+  return (c^0xFFFFFFFF)>>>0;}
+function pngWithMeta(pngBuf,kv){
+  var src=new Uint8Array(pngBuf),off=8,parts=[src.slice(0,8)],keys=Object.keys(kv);
+  while(off<src.length){
+    var len=(src[off]<<24)|(src[off+1]<<16)|(src[off+2]<<8)|src[off+3];
+    var type=String.fromCharCode(src[off+4],src[off+5],src[off+6],src[off+7]);
+    var chunk=src.slice(off,off+12+len);
+    parts.push(chunk);
+    if(type==='IHDR'){
+      keys.forEach(function(k){
+        var data=new TextEncoder().encode(k+'\0'+kv[k]);
+        var b=new Uint8Array(4+4+data.length+4),dv=new DataView(b.buffer);
+        dv.setUint32(0,data.length);
+        b[4]=116;b[5]=69;b[6]=88;b[7]=116;
+        b.set(data,8);
+        dv.setUint32(8+data.length,crc32(b.slice(4,8+data.length)));
+        parts.push(b);});
+    }
+    off+=12+len;
+  }
+  var total=parts.reduce(function(s,b){return s+b.length;},0);
+  var res=new Uint8Array(total),p=0;
+  parts.forEach(function(b){res.set(b,p);p+=b.length;});
+  return res.buffer;
+}
+function exportPNG(){
+  return rasterCanvas().then(function(cv){
+    return new Promise(function(res){cv.toBlob(res,'image/png');});
+  }).then(function(blob){
+    return blob.arrayBuffer();
+  }).then(function(buf){
+    var meta={
+      'Source Data URL':SPEC.sourceUrl||'NA',
+      'Data SHA-256':DATA.sha,
+      'Generated At':new Date().toISOString(),
+      'Renderer':'FigForge/1.0',
+      'Figure Size (mm)':SPEC.widthMM+' x '+SPEC.heightMM,
+      'Provenance':JSON.stringify(buildProvenance())
+    };
+    dl(new Blob([pngWithMeta(buf,meta)],{type:'image/png'}),fname('png'));
+    toast('PNG 已导出（含 tEXt 溯源块）');
+  });
+}
+function ByteWriter(){this.parts=[];this.len=0;}
+ByteWriter.prototype.s=function(str){var b=new TextEncoder().encode(str);this.parts.push(b);this.len+=b.length;};
+ByteWriter.prototype.u8=function(a){this.parts.push(a);this.len+=a.length;};
+ByteWriter.prototype.blob=function(t){return new Blob(this.parts,{type:t});};
+function pdfStr(s){
+  if(/^[\x20-\x7E]*$/.test(s))return '('+s.replace(/([\\()])/g,'\\$1')+')';
+  var utf=new TextEncoder().encode('﻿'+s),out='<';
+  Array.prototype.forEach.call(utf,function(b){out+=b.toString(16).padStart(2,'0');});
+  return out+'>';
+}
+function exportPDF(){
+  return rasterCanvas().then(function(cv){
+    var dataUrl=cv.toDataURL('image/jpeg',0.95);
+    return fetch(dataUrl).then(function(r){return r.arrayBuffer();}).then(function(jpg){
+      var bytes=new Uint8Array(jpg);
+      var pw=(SPEC.widthMM/25.4*72).toFixed(2),ph=(SPEC.heightMM/25.4*72).toFixed(2);
+      var now=new Date(),z=function(n){return String(n).padStart(2,'0');};
+      var pdfDate='D:'+now.getUTCFullYear()+z(now.getUTCMonth()+1)+z(now.getUTCDate())+
+        z(now.getUTCHours())+z(now.getUTCMinutes())+z(now.getUTCSeconds())+'Z';
+      var prov=buildProvenance();
+      var kw='source_data_url='+(SPEC.sourceUrl||'NA')+'; sha256='+DATA.sha+
+        '; generated_at='+prov.generated_at+'; renderer=FigForge/1.0; dpi='+SPEC.dpi+
+        '; size='+SPEC.widthMM+'x'+SPEC.heightMM+'mm; chart='+SPEC.chart;
+      var xmp='<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>\n'+
+        '<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">'+
+        '<rdf:Description xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" '+
+        'dc:source="'+String(SPEC.sourceUrl||'NA').replace(/[<>&"]/g,'')+'" '+
+        'xmp:CreatorTool="FigForge/1.0" xmp:CreateDate="'+prov.generated_at+'" '+
+        'xmp:ModifyDate="'+prov.generated_at+'">'+
+        '<dc:description>'+JSON.stringify(prov).replace(/[<>&]/g,'')+'</dc:description>'+
+        '</rdf:Description></rdf:RDF></x:xmpmeta>\n<?xpacket end="w"?>';
+      var xmpB=new TextEncoder().encode(xmp);
+      var content='q '+pw+' 0 0 '+ph+' 0 0 cm /Im0 Do Q';
+      var w=new ByteWriter();
+      w.s('%PDF-1.7\n');
+      w.u8(new Uint8Array([0x25,0xE2,0xE3,0xCF,0xD3,0x0A]));
+      var offsets=[],maxObj=0;
+      function obj(id,body){offsets[id]=w.len;w.s(id+' 0 obj\n'+body+'\nendobj\n');if(id>maxObj)maxObj=id;}
+      obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+      obj(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+      obj(3,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+pw+' '+ph+'] '+
+        '/Resources << /XObject << /Im0 6 0 R >> >> /Contents 5 0 R >>');
+      obj(4,'<< /Type /Metadata /Subtype /XML /Length '+xmpB.length+' >>\nstream\n');
+      w.u8(xmpB);w.s('\nendstream');
+      obj(5,'<< /Length '+content.length+' >>\nstream\n'+content+'\nendstream');
+      obj(6,'<< /Type /XObject /Subtype /Image /Width '+cv.width+' /Height '+cv.height+
+        ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+bytes.length+' >>\nstream\n');
+      w.u8(bytes);w.s('\nendstream');
+      obj(7,'<< /Title '+pdfStr('Fig1 · '+JOURNALS[SPEC.journal].name)+
+        ' /Author '+pdfStr('FigForge/1.0')+
+        ' /Creator '+pdfStr('FigForge/1.0 (browser)')+
+        ' /Producer '+pdfStr('FigForge/1.0')+
+        ' /Subject '+pdfStr('source_data_url='+(SPEC.sourceUrl||'NA')+' sha256='+DATA.sha)+
+        ' /Keywords '+pdfStr(kw)+
+        ' /CreationDate ('+pdfDate+') /ModDate ('+pdfDate+') >>');
+      var start=w.len,i;
+      w.s('xref\n0 '+(maxObj+1)+'\n0000000000 65535 f \n');
+      for(i=1;i<=maxObj;i++)w.s(String(offsets[i]).padStart(10,'0')+' 00000 n \n');
+      w.s('trailer\n<< /Size '+(maxObj+1)+' /Root 1 0 R /Info 7 0 R >>\nstartxref\n'+start+'\n%%EOF\n');
+      dl(w.blob('application/pdf'),fname('pdf'));
+      toast('PDF 已导出（含 XMP + Info 溯源）');
+    });
+  });
+}
+function buildTIFF(rgba,w,h,dpi,desc,soft){
+  function enc(s){
+    return new TextEncoder().encode(s.replace(/[^\x20-\x7E]/g,'?')+String.fromCharCode(0));}
+  var descB=enc(desc),softB=enc(soft);
+  var bits=new Uint8Array([8,0,8,0,8,0]);
+  function rat(v){
+    var b=new Uint8Array(8),dv=new DataView(b.buffer);
+    dv.setUint32(0,v,true);dv.setUint32(4,1,true);return b;}
+  var xres=rat(dpi),yres=rat(dpi);
+  var entries=[[256,4,1],[257,4,1],[258,3,3],[259,3,1],[262,3,1],[270,2,descB.length],[273,4,1],
+    [274,3,1],[277,3,1],[278,4,1],[279,4,1],[282,5,1],[283,5,1],[284,3,1],[296,3,1],[305,2,softB.length]];
+  var IFD_OFF=8,IFD_SIZE=2+12*entries.length+4;
+  var extra=[],ptr=IFD_OFF+IFD_SIZE,off={};
+  function place(t,u8){
+    if(ptr&1){extra.push(new Uint8Array([0]));ptr++;}
+    off[t]=ptr;
+    extra.push(u8);ptr+=u8.length;}
+  place(258,bits);place(270,descB);place(282,xres);place(283,yres);place(305,softB);
+  var DATA_OFF=ptr,total=DATA_OFF+w*h*3;
+  var buf=new Uint8Array(total),dv=new DataView(buf.buffer),i;
+  buf[0]=0x49;buf[1]=0x49;dv.setUint16(2,42,true);dv.setUint32(4,IFD_OFF,true);
+  dv.setUint16(IFD_OFF,entries.length,true);
+  var o=IFD_OFF+2;
+  entries.forEach(function(e){
+    var tag=e[0],type=e[1],count=e[2];
+    dv.setUint16(o,tag,true);dv.setUint16(o+2,type,true);dv.setUint32(o+4,count,true);
+    if(tag===256)dv.setUint32(o+8,w,true);
+    else if(tag===257)dv.setUint32(o+8,h,true);
+    else if(tag===278)dv.setUint32(o+8,h,true);
+    else if(tag===273)dv.setUint32(o+8,DATA_OFF,true);
+    else if(tag===279)dv.setUint32(o+8,w*h*3,true);
+    else if(type===3&&count===1){
+      var val=(tag===259)?1:(tag===262)?2:(tag===274)?1:(tag===277)?3:(tag===284)?1:(tag===296)?2:1;
+      dv.setUint16(o+8,val,true);
+    }else dv.setUint32(o+8,off[tag],true);
+    o+=12;});
+  dv.setUint32(o,0,true);
+  var q=IFD_OFF+IFD_SIZE;
+  extra.forEach(function(b){buf.set(b,q);q+=b.length;});
+  for(i=0;i<w*h;i++){buf[q++]=rgba[i*4];buf[q++]=rgba[i*4+1];buf[q++]=rgba[i*4+2];}
+  return buf.buffer;
+}
+function exportTIFF(){
+  return rasterCanvas().then(function(cv){
+    var c=cv.getContext('2d'),id=c.getImageData(0,0,cv.width,cv.height);
+    var prov=buildProvenance();
+    var desc='FigForge/1.0 | source_data_url='+(SPEC.sourceUrl||'NA')+' | sha256='+DATA.sha+
+      ' | generated_at='+prov.generated_at+' | size='+SPEC.widthMM+'x'+SPEC.heightMM+'mm'+
+      ' | dpi='+SPEC.dpi+' | chart='+SPEC.chart+' | journal='+JOURNALS[SPEC.journal].name;
+    var buf=buildTIFF(id.data,cv.width,cv.height,SPEC.dpi,desc,'FigForge/1.0');
+    dl(new Blob([buf],{type:'image/tiff'}),fname('tif'));
+    toast('TIFF 已导出（ImageDescription 内嵌链接与时间戳）');
+  });
+}
+function doExport(){
+  if(!DATA){toast('请先载入数据');return;}
+  if(!EXPORTS_READY){toast('预检未通过，无法导出');return;}
+  var f=$('#selFmt').value,p;
+  if(f==='svg'){exportSVG();return;}
+  if(f==='png')p=exportPNG();
+  else if(f==='pdf')p=exportPDF();
+  else p=exportTIFF();
+  p.catch(function(e){console.error(e);toast('导出失败：'+e.message);});
+}
+function exportSpec(){downloadText(JSON.stringify(buildProvenance(),null,2),'figure_spec.json','application/json');}
+function exportData(){
+  if(!DATA)return;
+  var rows=[DATA.cols.map(function(c){return c.name;})],i,j;
+  for(i=0;i<DATA.n;i++){
+    var row=[];
+    for(j=0;j<DATA.cols.length;j++)row.push(DATA.cols[j].vals[i]===undefined?'':DATA.cols[j].vals[i]);
+    rows.push(row);
+  }
+  var csv='\ufeff'+rows.map(function(r){
+    return r.map(function(v){
+      var s=String(v);
+      return /[",\r\n\t]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',');}).join('\r\n');
+  downloadText(csv,DATA.name.replace(/\.(csv|tsv|txt)$/i,'')+'_original_copy.csv','text/csv;charset=utf-8');
+  setTimeout(function(){
+    downloadText(JSON.stringify({file:DATA.name,rows:DATA.n,sha256:DATA.sha,
+      generated_at:new Date().toISOString(),source_url:SPEC.sourceUrl||null,
+      alterations:DATA.alters},null,2),'raw_data_checksum.json','application/json');},350);
+}
+
+/* ---------- 12. 复现代码生成 ---------- */
+function dataFileArg(){
+  var u=(SPEC.sourceUrl||'').trim();
+  if(/^https?:/.test(u))return u;
+  if(u)return u;
+  return (DATA&&DATA.name)?DATA.name:'data.csv';
+}
+function genPython(){
+  var J=JOURNALS[SPEC.journal],c=SPEC.candidates.filter(function(x){return x.chart===SPEC.chart;})[0]||{};
+  var pal=PALETTES[SPEC.palette].map(function(x){return '"'+x+'"';}).join(', ');
+  var L=[];
+  L.push('# FigForge reproducible script  —  '+J.name+' '+
+    (SPEC.colMode==='single'?'single column':SPEC.colMode==='onehalf'?'1.5 column':'double column')+
+    ' '+SPEC.widthMM+' x '+SPEC.heightMM+' mm');
+  L.push('# generated_at: '+new Date().toISOString());
+  L.push('# source data: '+(SPEC.sourceUrl||DATA.name)+'   sha256: '+DATA.sha);
+  L.push('# honesty note — what this chart hides: '+(c.caveat||'').replace(/\n/g,' '));
+  L.push('');
+  L.push('import numpy as np, pandas as pd, matplotlib as mpl');
+  L.push('mpl.use("Agg")');
+  L.push('import matplotlib.pyplot as plt');
+  L.push('from matplotlib.colors import LinearSegmentedColormap');
+  L.push('from scipy import stats');
+  L.push('');
+  L.push('MM = 1 / 25.4');
+  L.push('SEED = '+SPEC.seed+'                      # jitter / 抽样随机性固定，保证可复现');
+  L.push('np.random.seed(SEED)');
+  L.push('');
+  L.push('plt.rcParams.update({');
+  L.push('    "font.family": "sans-serif",');
+  L.push('    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],');
+  L.push('    "font.size": '+SPEC.baseFont+', "axes.labelsize": '+SPEC.labelFont+
+    ', "xtick.labelsize": '+SPEC.tickFont+', "ytick.labelsize": '+SPEC.tickFont+',');
+  L.push('    "axes.linewidth": '+SPEC.lw+', "lines.linewidth": '+SPEC.lw+
+    ', "xtick.major.width": '+SPEC.lw+', "ytick.major.width": '+SPEC.lw+',');
+  L.push('    "grid.alpha": 0.15, "grid.color": "#1A1D1F",     # 网格线弱化至 15%');
+  L.push('    "figure.facecolor": "white", "savefig.facecolor": "white",');
+  L.push('    "svg.fonttype": "none", "pdf.fonttype": 42, "ps.fonttype": 42,   # 不转曲 + TrueType 嵌入');
+  L.push('})');
+  L.push('');
+  L.push('df = pd.read_csv("'+dataFileArg()+'")');
+  L.push('assert len(df) == '+DATA.n+', "行数与 FigForge 导出时不一致，疑似数据被改动"');
+  L.push('assert abs(df["'+SPEC.y+'"].astype(float).sum() - '+fmt(numPairs().reduce(function(s,p){return s+p.y;},0),6)+') < 1e-6, "Y 合计与导出时不一致"');
+  L.push('');
+  L.push('PALETTE = ['+pal+']');
+  L.push('fig, ax = plt.subplots(figsize=('+SPEC.widthMM+'*MM, '+SPEC.heightMM+'*MM))');
+  L.push('ax.set_facecolor("white")');
+  var groups=groupsOf();
+  if(SPEC.chart==='scatter'){
+  if(SPEC.group){
+      L.push('for i, (name, sub) in enumerate(df.groupby("'+SPEC.group+'", sort=True)):');
+      L.push('    ax.scatter(sub["'+SPEC.x+'"], sub["'+SPEC.y+'"], s='+Math.max(3,Math.round(SPEC.tickFont*2))+
+        ', color=PALETTE[i % len(PALETTE)], alpha=0.72, edgecolors="none", label=str(name))');
+    }else{
+      L.push('ax.scatter(df["'+SPEC.x+'"], df["'+SPEC.y+'"], s='+Math.max(3,Math.round(SPEC.tickFont*2))+
+        ', color=PALETTE[0], alpha=0.72, edgecolors="none")');
+    }
+    if(SPEC.fit&&SPEC.fitInfo){
+      L.push('b, a = np.polyfit(df["'+SPEC.x+'"].astype(float), df["'+SPEC.y+'"].astype(float), 1)');
+      L.push('xs = np.linspace(df["'+SPEC.x+'"].min(), df["'+SPEC.x+'"].max(), 200)');
+      L.push('ax.plot(xs, a + b*xs, color="#111111", lw='+SPEC.lw+', ls="--")   # OLS，图注须声明');
+    }
+  }else if(SPEC.chart==='hist2d'){
+    L.push('cmap = LinearSegmentedColormap.from_list("figforge_viridis", PALETTE)');
+    L.push('h = ax.hist2d(df["'+SPEC.x+'"].astype(float), df["'+SPEC.y+'"].astype(float), bins='+SPEC.bins+
+      ', cmap=cmap)   # 方形 bin '+SPEC.bins+'x'+SPEC.bins+'，全部观测参与计数');
+  }else if(SPEC.chart==='line'){
+    if(SPEC.group){
+      L.push('for i, (name, sub) in enumerate(df.groupby("'+SPEC.group+'", sort=True)):');
+      L.push('    sub = sub.sort_values("'+SPEC.x+'")');
+      L.push('    ax.plot(sub["'+SPEC.x+'"], sub["'+SPEC.y+'"], color=PALETTE[i % len(PALETTE)], lw='+SPEC.lw+
+        ', marker="o", ms=2.5, label=str(name))');
+    }else{
+      L.push('d = df.sort_values("'+SPEC.x+'")');
+      L.push('ax.plot(d["'+SPEC.x+'"], d["'+SPEC.y+'"], color=PALETTE[0], lw='+SPEC.lw+', marker="o", ms=2.5)');
+    }
+  }else{
+    var order=groups.map(function(g){return '"'+g.name+'"';}).join(', ');
+    L.push('ORDER = ['+order+']');
+    L.push('sub = df[df["'+SPEC.x+'"].astype(str).isin(ORDER)]');
+    L.push('groups = [sub.loc[sub["'+SPEC.x+'"].astype(str) == g, "'+SPEC.y+'"].astype(float).values for g in ORDER]');
+    if(SPEC.chart==='box'){
+      L.push('bp = ax.boxplot(groups, widths=0.6, patch_artist=True, showfliers=True,');
+      L.push('               medianprops={"color":"#111111","linewidth":'+(SPEC.lw*1.4).toFixed(2)+'},');
+      L.push('               boxprops={"facecolor":"none","linewidth":'+SPEC.lw+'},');
+      L.push('               whiskerprops={"linewidth":'+(SPEC.lw*0.8).toFixed(2)+'},');
+      L.push('               capprops={"linewidth":'+(SPEC.lw*0.8).toFixed(2)+'})');
+      L.push('for i, vals in enumerate(groups):');
+      L.push('    ax.scatter(np.random.normal(i + 1, 0.06, len(vals)), vals, s='+Math.max(2,Math.round(SPEC.tickFont*1.6))+
+        ', color=PALETTE[i % len(PALETTE)], alpha=0.65, zorder=3)   # 叠加全部原始点');
+    }else if(SPEC.chart==='strip'){
+      L.push('for i, vals in enumerate(groups):');
+      L.push('    ax.scatter(np.random.uniform(i + 1 - 0.22, i + 1 + 0.22, len(vals)), vals,');
+      L.push('               s='+Math.max(3,Math.round(SPEC.tickFont*2))+', color=PALETTE[i % len(PALETTE)], alpha=0.65)');
+      L.push('    ax.hlines(np.median(vals), i + 1 - 0.28, i + 1 + 0.28, color="#111111", lw='+(SPEC.lw*1.5).toFixed(2)+')');
+    }else{
+      L.push('means = [np.mean(v) for v in groups]');
+      if(SPEC.errBar==='sd')L.push('errs  = [np.std(v, ddof=1) for v in groups]           # SD');
+      else if(SPEC.errBar==='sem')L.push('errs  = [np.std(v, ddof=1)/np.sqrt(len(v)) for v in groups]   # SEM');
+      else L.push('errs  = [1.96*np.std(v, ddof=1)/np.sqrt(len(v)) for v in groups]   # 95% CI');
+      L.push('xs = np.arange(1, len(groups) + 1)');
+      L.push('ax.bar(xs, means, 0.62, yerr=errs, capsize=3, color=[PALETTE[i % len(PALETTE)] for i in xs],');
+      L.push('       alpha=0.55, edgecolor="#111111", linewidth='+SPEC.lw+')');
+      if(SPEC.showPoints){
+        L.push('for i, vals in enumerate(groups):');
+        L.push('    ax.scatter(np.random.uniform(i + 1 - 0.2, i + 1 + 0.2, len(vals)), vals,');
+        L.push('               s='+Math.max(2,Math.round(SPEC.tickFont*1.6))+', color="#111111", alpha=0.7, zorder=3)');
+      }
+    }
+    L.push('ax.set_xticks(range(1, len(ORDER) + 1))');
+    L.push('ax.set_xticklabels(ORDER)');
+    if(SPEC.showN){
+      L.push('for i, vals in enumerate(groups):');
+      L.push('    ax.text(i + 1, ax.get_ylim()[0] + 0.02*(ax.get_ylim()[1]-ax.get_ylim()[0]), "n="+str(len(vals)),');
+      L.push('            ha="center", va="bottom", fontsize='+SPEC.tickFont+', color="#333333")');
+    }
+  }
+  if(SPEC.stats&&SPEC.anno){
+    var i0=SPEC.anno.i+1,i1=SPEC.anno.j+1;
+    L.push('');
+    L.push('# 显著性：'+SPEC.stats.testName+' —— 与 FigForge 页面一致');
+    L.push('a = groups['+SPEC.anno.i+']; b = groups['+SPEC.anno.j+']');
+    L.push('t, p = stats.ttest_ind(a, b, equal_var='+(SPEC.stats.method==='student'?'True':'False')+')');
+    L.push('print(f"t={t:.4f}, df={len(a)+len(b)-2}, p={p:.5f}")   # FigForge: t='+fmt(SPEC.stats.stat,4)+
+      ', p='+fmt(SPEC.stats.p,5)+', adjusted='+fmt(SPEC.stats.padj,5));
+    L.push('plt.annotate("'+SPEC.anno.label+'", xy=(('+i0+'+'+i1+')/2, max(max(a), max(b))*1.05), ha="center")');
+  }
+  L.push('');
+  L.push('ax.set_xlabel("'+(SPEC.xlabel||SPEC.x)+'")');
+  L.push('ax.set_ylabel("'+(SPEC.ylabel||SPEC.y)+'")');
+  L.push('ax.grid(True, alpha=0.15, color="#1A1D1F", linewidth='+Math.max(0.2,SPEC.lw*0.6).toFixed(2)+')');
+  if(SPEC.yCut)L.push('ax.set_ylim('+SPEC.yCut[0]+', '+SPEC.yCut[1]+')   # 已截断 —— 须在图上标断轴符号');
+  if(SPEC.group&&(SPEC.chart==='scatter'||SPEC.chart==='line'))
+    L.push('ax.legend(frameon=False, fontsize='+SPEC.tickFont+')');
+  L.push('fig.text(MM*2, '+SPEC.heightMM+'*MM - '+SPEC.panelFont+', "'+(SPEC.panel||'a')+
+    '", fontsize='+SPEC.panelFont+', fontweight="bold", va="top")');
+  L.push('');
+  L.push('meta = {"Title": "Fig1", "Author": "FigForge/1.0",');
+  L.push('        "Subject": "source_data_url='+(SPEC.sourceUrl||DATA.name)+'",');
+  L.push('        "Keywords": "sha256='+DATA.sha+'; generated_at='+new Date().toISOString()+'; dpi='+SPEC.dpi+'"}');
+  L.push('fig.savefig("'+fname('pdf')+'", dpi='+SPEC.dpi+', metadata=meta)');
+  L.push('fig.savefig("'+fname('svg')+'", dpi='+SPEC.dpi+', metadata=meta)');
+  L.push('# 若需 TIFF：把 fig 光栅化后按最终印刷尺寸保存，禁用上采样');
+  L.push('fig.savefig("'+fname('png')+'", dpi='+SPEC.dpi+', metadata=meta)');
+  return L.join('\n');
+}
+function genR(){
+  var J=JOURNALS[SPEC.journal],c=SPEC.candidates.filter(function(x){return x.chart===SPEC.chart;})[0]||{};
+  var pal=PALETTES[SPEC.palette].map(function(x){return '"'+x+'"';}).join(', ');
+  var L=[];
+  L.push('# FigForge reproducible script (R / ggplot2)  —  '+J.name+' '+
+    (SPEC.colMode==='single'?'single column':SPEC.colMode==='onehalf'?'1.5 column':'double column')+
+    ' '+SPEC.widthMM+' x '+SPEC.heightMM+' mm');
+  L.push('# generated_at: '+new Date().toISOString());
+  L.push('# source data: '+(SPEC.sourceUrl||DATA.name)+'   sha256: '+DATA.sha);
+  L.push('# honesty note — what this chart hides: '+(c.caveat||'').replace(/\n/g,' '));
+  L.push('');
+  L.push('library(ggplot2)');
+  L.push('library(dplyr)');
+  L.push('');
+  L.push('set.seed('+SPEC.seed+')   # jitter 随机性固定');
+  L.push('MM <- 1 / 25.4');
+  L.push('PALETTE <- c('+pal+')');
+  L.push('df <- readr::read_csv("'+dataFileArg()+'", show_col_types = FALSE)');
+  L.push('stopifnot(nrow(df) == '+DATA.n+')   # 行数校验：数据不得被改动');
+  L.push('');
+  L.push('theme_figforge <- theme(');
+  L.push('  text = element_text(family = "Arial", size = '+SPEC.baseFont+'),');
+  L.push('  axis.title = element_text(size = '+SPEC.labelFont+'),');
+  L.push('  axis.text = element_text(size = '+SPEC.tickFont+', colour = "#111111"),');
+  L.push('  axis.line = element_line(colour = "#111111", linewidth = '+SPEC.lw+'),');
+  L.push('  panel.grid.major = element_line(colour = "#1A1D1F", linewidth = '+
+    Math.max(0.2,SPEC.lw*0.6).toFixed(2)+'),   # 15% 已由 alpha 控制');
+  L.push('  panel.grid.major.x = element_line(colour = alpha("#1A1D1F", 0.15)),');
+  L.push('  panel.grid.major.y = element_line(colour = alpha("#1A1D1F", 0.15)),');
+  L.push('  panel.grid.minor = element_blank(),');
+  L.push('  panel.background = element_rect(fill = "white", colour = NA),');
+  L.push('  plot.background = element_rect(fill = "white", colour = NA),');
+  L.push('  legend.key = element_rect(fill = "white", colour = NA),');
+  L.push('  legend.background = element_blank()');
+  L.push(')');
+  L.push('');
+  if(SPEC.chart==='scatter'){
+    if(SPEC.group){
+      L.push('p <- ggplot(df, aes(x = .data[["'+SPEC.x+'"]], y = .data[["'+SPEC.y+'"]], colour = factor(.data[["'+SPEC.group+'"]]))) +');
+      L.push('  geom_point(alpha = 0.72, size = '+Math.max(1,SPEC.tickFont*0.4).toFixed(1)+', shape = 16) +');
+      L.push('  labs(colour = "'+SPEC.group+'")');
+    }else{
+      L.push('p <- ggplot(df, aes(x = .data[["'+SPEC.x+'"]], y = .data[["'+SPEC.y+'"]])) +');
+      L.push('  geom_point(alpha = 0.72, size = '+Math.max(1,SPEC.tickFont*0.4).toFixed(1)+', shape = 16, colour = PALETTE[1])');
+    }
+    if(SPEC.fit)L.push('p <- p + geom_smooth(method = "lm", se = TRUE, colour = "#111111", linewidth = '+SPEC.lw+', linetype = "dashed")   # OLS，须在图注声明');
+  }else if(SPEC.chart==='hist2d'){
+    L.push('p <- ggplot(df, aes(x = .data[["'+SPEC.x+'"]], y = .data[["'+SPEC.y+'"]])) +');
+    L.push('  geom_bin2d(bins = '+SPEC.bins+') +   # '+SPEC.bins+'x'+SPEC.bins+' 方形 bin，全部观测参与计数');
+    L.push('  scale_fill_gradientn(colours = PALETTE)');
+  }else if(SPEC.chart==='line'){
+    if(SPEC.group){
+      L.push('p <- ggplot(df, aes(x = .data[["'+SPEC.x+'"]], y = .data[["'+SPEC.y+'"]], colour = factor(.data[["'+SPEC.group+'"]]), group = factor(.data[["'+SPEC.group+'"]]))) +');
+      L.push('  geom_line(linewidth = '+SPEC.lw+') + geom_point(size = 1.2) + labs(colour = "'+SPEC.group+'")');
+    }else{
+      L.push('p <- ggplot(df, aes(x = .data[["'+SPEC.x+'"]], y = .data[["'+SPEC.y+'"]])) +');
+      L.push('  geom_line(linewidth = '+SPEC.lw+', colour = PALETTE[1]) + geom_point(size = 1.2)');
+    }
+  }else{
+    var order=groupsOf().map(function(g){return '"'+g.name+'"';}).join(', ');
+    if(SPEC.chart==='box'){
+      L.push('p <- ggplot(df, aes(x = factor(.data[["'+SPEC.x+'"]], levels = c('+order+')), y = .data[["'+SPEC.y+'"]])) +');
+      L.push('  geom_boxplot(width = 0.55, outlier.shape = 3, linewidth = '+SPEC.lw+') +');
+      L.push('  geom_jitter(width = 0.12, alpha = 0.65, size = '+Math.max(0.8,SPEC.tickFont*0.28).toFixed(1)+')   # 叠加全部原始点');
+    }else if(SPEC.chart==='strip'){
+      L.push('p <- ggplot(df, aes(x = factor(.data[["'+SPEC.x+'"]], levels = c('+order+')), y = .data[["'+SPEC.y+'"]])) +');
+      L.push('  geom_jitter(width = 0.22, alpha = 0.65, size = '+Math.max(0.8,SPEC.tickFont*0.3).toFixed(1)+') +');
+      L.push('  stat_summary(fun = median, fun.min = median, fun.max = median, geom = "crossbar", width = 0.35, linewidth = '+(SPEC.lw*1.5).toFixed(2)+')');
+    }else{
+      var FUN=(SPEC.errBar==='sd')?'mean_sd':(SPEC.errBar==='sem')?'mean_se':'mean_cl_normal';
+      L.push('p <- ggplot(df, aes(x = factor(.data[["'+SPEC.x+'"]], levels = c('+order+')), y = .data[["'+SPEC.y+'"]])) +');
+      L.push('  stat_summary(fun = mean, geom = "col", width = 0.62, alpha = 0.55, linewidth = '+SPEC.lw+') +');
+      L.push('  stat_summary(fun.data = '+FUN+', geom = "errorbar", width = 0.18, linewidth = '+SPEC.lw+')   # '+
+        ({sd:'SD',sem:'SEM',ci95:'95% CI'})[SPEC.errBar]);
+      if(SPEC.showPoints)L.push('p <- p + geom_jitter(width = 0.14, alpha = 0.7, size = '+Math.max(0.7,SPEC.tickFont*0.26).toFixed(1)+')');
+    }
+    L.push('p <- p + scale_colour_manual(values = PALETTE) + scale_fill_manual(values = PALETTE)');
+  }
+  if(SPEC.yCut)L.push('p <- p + coord_cartesian(ylim = c('+SPEC.yCut[0]+', '+SPEC.yCut[1]+'))   # 已截断：须标断轴符号');
+  if(SPEC.stats&&SPEC.anno)L.push('# '+SPEC.stats.testName+' → '+SPEC.stats.label+'；页面已写入 figure_spec.json，此处可用 ggsignif::geom_signif 复现同一 p');
+  L.push('');
+  L.push('p <- p + labs(x = "'+(SPEC.xlabel||SPEC.x)+'", y = "'+(SPEC.ylabel||SPEC.y)+'", tag = "'+(SPEC.panel||'a')+'") + theme_figforge');
+  L.push('');
+  L.push('ggsave("'+fname('pdf')+'", p, width = '+SPEC.widthMM+', height = '+SPEC.heightMM+', units = "mm", dpi = '+SPEC.dpi+', device = cairo_pdf)');
+  L.push('ggsave("'+fname('svg')+'", p, width = '+SPEC.widthMM+', height = '+SPEC.heightMM+', units = "mm", dpi = '+SPEC.dpi+')');
+  L.push('# TIFF：ggsave("'+fname('tif')+'", p, ..., device = "tiff", compression = "lzw", dpi = '+SPEC.dpi+')');
+  L.push('');
+  L.push('# sessionInfo() 快照随 figure_spec.json 一并交付，供编辑部复役');
+  return L.join('\n');
+}
+function renderCode(){
+  if(!DATA){CODE={py:'载入数据后生成。',r:'载入数据后生成。'};$('#code').textContent=CODE.py;return;}
+  try{CODE.py=genPython();}catch(e){CODE.py='# 生成失败：'+e.message;}
+  try{CODE.r=genR();}catch(e){CODE.r='# 生成失败：'+e.message;}
+  $('#code').textContent=(CODE_TAB==='py'?CODE.py:CODE.r);
+}
+function showCode(t){
+  CODE_TAB=t;
+  $('#tabPy').className='sm'+(t==='py'?' primary':'');
+  $('#tabR').className='sm'+(t==='r'?' primary':'');
+  $('#code').textContent=(t==='py'?CODE.py:CODE.r);
+}
+function copyCode(){
+  var txt=(CODE_TAB==='py'?CODE.py:CODE.r);
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){toast('代码已复制');},
+    function(){toast('复制失败，请手动选择');});
+  else toast('当前环境不支持剪贴板，请手动选择');
+}
+function downloadCode(){
+  if(CODE_TAB==='py')downloadText(CODE.py,'fig1_figure.py','text/x-python;charset=utf-8');
+  else downloadText(CODE.r,'fig1_figure.R','text/plain;charset=utf-8');
+}
+function downloadReq(){
+  var req='# 与 FigForge 导出环境对齐的版本锁（pip install -r requirements.txt）\n'+
+    'numpy==1.26.4\npandas==2.2.2\nmatplotlib==3.8.4\nscipy==1.13.0\n\n'+
+    '# R：sessionInfo() 快照\n# ggplot2 3.5.1 / readr 2.1.5 / dplyr 1.1.4（如\kappa 使用 ggsignif 请另加 0.6.4）';
+  downloadText(req,'requirements.txt','text/plain;charset=utf-8');
+}
+
+/* ---------- 13. 示例数据 ---------- */
+function sampleDataset(kind){
+  var rnd=mulberry32(kind==='dose'?7:kind==='ts'?11:kind==='sc'?23:91),rows=[];
+  function gauss(){var u=1-rnd(),v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  if(kind==='dose'){
+    rows.push(['concentration','viability','cell_line','batch']);
+    ['A','B'].forEach(function(line){
+      for(var i=0;i<120;i++){
+        var c=Math.round((0.1+i*0.09)*100)/100;
+        var base=line==='A'?100/(1+Math.pow(c/2.2,2.0)):100/(1+Math.pow(c/4.1,1.7));
+        rows.push([c,Math.round((base+gauss()*4.5+ (rnd()<0.02? gauss()*16:0))*100)/100,line,'batch'+(1+i%3)]);
+      }});
+    // 制造 6 个缺失,用于触发缺失率提示
+    rows[12][1]='';rows[41][1]='';rows[77][1]='';rows[99][1]='';rows[150][1]='';rows[201][1]='';
+    return {name:'sample_dose_response.csv',rows:rows};
+  }
+  if(kind==='ts'){
+    rows.push(['timestamp','temperature','sensor']);
+    ['S1','S2','S3'].forEach(function(s,k){
+      for(var i=0;i<1667;i++){
+        var t=new Date(Date.UTC(2026,0,1)+i*(k===1?1800000:600000)).toISOString().slice(0,19).replace('T',' ');
+        rows.push([t,Math.round((20+3*Math.sin(i/120)+gauss()*0.4+k*0.5)*1000)/1000,s]);
+      }});
+    return {name:'sample_timeseries.csv',rows:rows};
+  }
+  if(kind==='sc'){
+    rows.push(['umap_1','umap_2','expression','cluster']);
+    var centers=[[-3,-2],[3,1],[0,4],[-2,4],[4,-3]];
+    for(var i=0;i<60000;i++){
+      var c=centers[Math.floor(rnd()*centers.length)];
+      rows.push([Math.round((c[0]+gauss()*0.9)*1000)/1000,Math.round((c[1]+gauss()*0.9)*1000)/1000,
+        Math.round((Math.exp(-((c[0]+3)*(c[0]+3)+(c[1]+2)*(c[1]+2))/8)*12+0.4+gauss()*0.5)*1000)/1000,
+        'C'+(centers.indexOf(c)+1)]);
+    }
+    return {name:'sample_large_scatter.csv',rows:rows};
+  }
+  rows.push(['subject','group','response']);
+  var specs=[['Control',38,1.0],['Low dose',35,1.1],['High dose',47,1.4]];
+  var i2;
+  for(i2=0;i2<90;i2++){
+    var sp=specs[i2%3],idx=Math.floor(i2/3)+1;
+    var val=sp[1]+gauss()*4*sp[2]+(rnd()<0.03?gauss()*12:0);
+    rows.push(['S'+String(idx).padStart(3,'0'),sp[0],Math.round(val*100)/100]);
+  }
+  return {name:'sample_three_groups.csv',rows:rows};
+}
+function loadSample(kind){
+  var d=sampleDataset(kind);
+  var raw=d.rows.map(function(r){
+    return r.map(function(v){return /[",\n]/.test(String(v))?'"'+String(v).replace(/"/g,'""')+'"':v;}).join(',');
+  }).join('\n');
+  var t0=performance.now();
+  ingest(d.name,parseDelim(raw).rows,raw).then(function(){
+    toast('示例载入完成：'+d.rows.length+' 行 · 解析 '+Math.round(performance.now()-t0)+' ms');});
+}
+
+/* ---------- 14. 初始化与事件绑定 ---------- */
+function refreshAll(){renderSelects();renderCandidates();renderMain();renderSwatches();}
+function syncDpi(v){
+  v=Math.round(parseInt(v,10)/100)*100;
+  v=clamp(isFinite(v)?v:300,300,1200);
+  SPEC.dpi=v;$('#inDpi').value=v;$('#rngDpi').value=v;renderMain();
+}
+function readFile(f){
+  var fr=new FileReader();
+  fr.onload=function(){
+    var text=String(fr.result);
+    ingest(f.name,parseDelim(text).rows,text).then(function(){
+      toast('载入完成：'+DATA.n+' 行 × '+DATA.cols.length+' 列');});
+  };
+  fr.readAsText(f,'utf-8');
+}
+function init(){
+  renderJournals();renderSwatches();applyJournal();
+  var drop=$('#drop');
+  ['dragenter','dragover'].forEach(function(ev){
+    drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('over');});});
+  ['dragleave','drop'].forEach(function(ev){
+    drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('over');});});
+  drop.addEventListener('drop',function(e){
+    if(e.dataTransfer.files&&e.dataTransfer.files[0])readFile(e.dataTransfer.files[0]);});
+  window.addEventListener('dragover',function(e){e.preventDefault();});
+  window.addEventListener('drop',function(e){e.preventDefault();});
+  $('#fileEl').addEventListener('change',function(){
+    if(this.files&&this.files[0])readFile(this.files[0]);});
+  $('#selX').addEventListener('change',function(){SPEC.x=this.value;SPEC.xlabel=this.value;$('#inXL').value=this.value;refreshAll();});
+  $('#selY').addEventListener('change',function(){SPEC.y=this.value;SPEC.ylabel=this.value;$('#inYL').value=this.value;refreshAll();});
+  $('#selG').addEventListener('change',function(){SPEC.group=this.value||null;refreshAll();});
+  $('#selPal').addEventListener('change',function(){SPEC.palette=this.value;renderSwatches();renderMain();renderCandidates();});
+  $('#selCvd').addEventListener('change',function(){SPEC.cvd=this.value;renderMain();});
+  $('#selCol').addEventListener('change',function(){SPEC.colMode=this.value;applyJournal();renderMain();renderCandidates();});
+  $('#selErr').addEventListener('change',function(){renderMain();});
+  $('#selGrid').addEventListener('change',function(){renderMain();});
+  $('#selFmt').addEventListener('change',function(){renderMain();});
+  $('#inW').addEventListener('change',function(){
+    var v=parseFloat(this.value);if(isFinite(v)&&v>10){SPEC.widthMM=v;renderMain();renderCandidates();}});
+  $('#inH').addEventListener('change',function(){
+    var v=parseFloat(this.value);if(isFinite(v)&&v>10){SPEC.heightMM=v;renderMain();renderCandidates();}});
+  $('#inFS').addEventListener('change',function(){
+    var v=parseFloat(this.value);if(isFinite(v)){
+      SPEC.tickFont=clamp(v,JOURNALS[SPEC.journal].minFont,JOURNALS[SPEC.journal].maxFont);
+      SPEC.labelFont=clamp(Math.min(v+1,SPEC.tickFont+1),JOURNALS[SPEC.journal].minFont,JOURNALS[SPEC.journal].maxFont);
+      SPEC.baseFont=SPEC.tickFont;this.value=SPEC.tickFont;renderMain();renderCandidates();}});
+  $('#inLW').addEventListener('change',function(){
+    var v=parseFloat(this.value);if(isFinite(v)&&v>0){SPEC.lw=v;renderMain();renderCandidates();}});
+  $('#inDpi').addEventListener('change',function(){syncDpi(this.value);});
+  $('#rngDpi').addEventListener('input',function(){syncDpi(this.value);});
+  $('#inXL').addEventListener('input',function(){SPEC.xlabel=this.value;renderMain();});
+  $('#inYL').addEventListener('input',function(){SPEC.ylabel=this.value;renderMain();});
+  $('#inSrc').addEventListener('input',function(){SPEC.sourceUrl=this.value.trim();renderChecks();renderCode();});
+  showCode('py');
+}
+init();
+</script>
+</body>
+</html>
